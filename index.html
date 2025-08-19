@@ -30,6 +30,7 @@
             line-height: 1.6;
         }
 
+        /* Layout Components */
         .container { 
             max-width: 1200px; 
             margin: 0 auto; 
@@ -58,6 +59,7 @@
             margin: 0;
         }
 
+        /* Button System */
         .btn { 
             padding: 12px 24px;
             border: none;
@@ -112,6 +114,7 @@
             font-size: 12px;
         }
 
+        /* Form Elements */
         .form-group { 
             margin-bottom: 20px; 
         }
@@ -140,6 +143,7 @@
             box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
         }
 
+        /* Table */
         .table { 
             width: 100%;
             border-collapse: collapse;
@@ -159,6 +163,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Header */
         .header { 
             background: var(--white);
             padding: 20px 0;
@@ -189,6 +194,7 @@
             color: var(--gray-dark);
         }
 
+        /* Sidebar */
         .sidebar { 
             width: 280px;
             background: var(--white);
@@ -225,6 +231,7 @@
             color: var(--white);
         }
 
+        /* Layout */
         .main-layout { 
             display: flex;
             max-width: 1200px;
@@ -236,6 +243,7 @@
             padding: 24px;
         }
 
+        /* Grid System */
         .grid { 
             display: grid;
             gap: 24px; 
@@ -246,7 +254,11 @@
         .grid-3 { 
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
         }
+        .grid-4 { 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        }
 
+        /* Stats Cards */
         .stat-card {
             text-align: center;
             padding: 32px 24px;
@@ -265,6 +277,7 @@
             font-weight: 500;
         }
 
+        /* Progress Bar */
         .progress { 
             width: 100%;
             height: 8px;
@@ -280,6 +293,7 @@
             transition: width 0.3s ease;
         }
 
+        /* Modal */
         .modal { 
             display: none;
             position: fixed;
@@ -323,6 +337,7 @@
             margin-top: 24px;
         }
 
+        /* Alerts */
         .alert { 
             padding: 16px 20px;
             border-radius: var(--radius-small);
@@ -348,6 +363,7 @@
             border: 1px solid #FFEAA7;
         }
 
+        /* Status Badges */
         .status-badge { 
             padding: 6px 12px;
             border-radius: var(--radius-small);
@@ -382,6 +398,7 @@
             color: #004085;
         }
 
+        /* Page Header */
         .page-header {
             margin-bottom: 32px;
         }
@@ -398,6 +415,7 @@
             font-size: 16px;
         }
 
+        /* KPI Item */
         .kpi-item {
             padding: 20px;
             border: 1px solid var(--border);
@@ -448,6 +466,7 @@
             text-align: center;
         }
 
+        /* Attendance Options */
         .attendance-options {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -480,6 +499,7 @@
             background: #D4EDDA;
         }
 
+        /* Login Page */
         .login-container {
             max-width: 400px;
             margin: 80px auto;
@@ -501,6 +521,7 @@
             margin-bottom: 32px;
         }
 
+        /* Tasks Section */
         .task-item {
             padding: 16px;
             border: 1px solid var(--border);
@@ -531,6 +552,7 @@
             line-height: 1.5;
         }
 
+        /* Filter Section */
         .filter-section {
             display: flex;
             gap: 16px;
@@ -560,20 +582,24 @@
             background: var(--white);
         }
 
+        /* Loading state */
         .loading {
             opacity: 0.6;
             pointer-events: none;
         }
 
+        /* Action buttons */
         .action-buttons {
             display: flex;
             gap: 8px;
         }
 
+        /* Login Form Fix */
         .login-form {
             width: 100%;
         }
 
+        /* Error message */
         .error-message {
             color: #721C24;
             background: #F8D7DA;
@@ -583,58 +609,34 @@
             font-size: 14px;
         }
 
+        /* Firebase Connection Status */
         .connection-status {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             padding: 8px 16px;
             border-radius: var(--radius-small);
             font-size: 12px;
             font-weight: 600;
-            z-index: 1000;
+            z-index: 1001;
         }
 
-        .connection-status.online {
+        .connection-status.connected {
             background: #D4EDDA;
             color: #155724;
         }
 
-        .connection-status.offline {
+        .connection-status.disconnected {
             background: #F8D7DA;
             color: #721C24;
         }
 
-        .firebase-loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+        .connection-status.loading {
+            background: #FFF3CD;
+            color: #856404;
         }
 
-        .firebase-loading.hide {
-            display: none;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--orange-light);
-            border-top: 4px solid var(--orange-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        /* Responsive */
         @media (max-width: 1024px) {
             .grid-3 { 
                 grid-template-columns: repeat(2, 1fr); 
@@ -660,7 +662,7 @@
                 min-width: 140px;
                 margin-bottom: 0;
             }
-            .grid-2, .grid-3 { 
+            .grid-2, .grid-3, .grid-4 { 
                 grid-template-columns: 1fr; 
             }
             .container, .content {
@@ -698,22 +700,16 @@
     </style>
 </head>
 <body>
-    <!-- Loading indicator -->
-    <div id="firebase-loading" class="firebase-loading">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Connection status -->
-    <div id="connection-status" class="connection-status offline">
+    <!-- Connection Status -->
+    <div id="connection-status" class="connection-status loading">
         Menghubungkan ke Firebase...
     </div>
 
     <div id="app">
         <!-- Login Screen -->
-        <div v-if="!currentUser" class="login-container">
+        <div v-if="!currentUser && !loading" class="login-container">
             <div class="login-card">
                 <h2 class="login-title">Absensi dan KPI Kantor Pusat Ibnu Katsir</h2>
-                <div v-if="firebaseError" class="error-message">{{ firebaseError }}</div>
                 <div v-if="loginError" class="error-message">{{ loginError }}</div>
                 <form @submit.prevent="login" class="login-form">
                     <div class="form-group">
@@ -724,15 +720,23 @@
                         <label class="form-label">Kata Sandi</label>
                         <input v-model="loginForm.password" type="password" class="form-control" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;" :disabled="firebaseLoading">
-                        {{ firebaseLoading ? 'Menghubungkan...' : 'Masuk' }}
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" :disabled="loading">
+                        {{ loading ? 'Memuat...' : 'Masuk' }}
                     </button>
                 </form>
             </div>
         </div>
 
+        <!-- Loading Screen -->
+        <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+            <div style="text-align: center;">
+                <div style="font-size: 24px; margin-bottom: 16px;">Memuat...</div>
+                <div>Menghubungkan ke server...</div>
+            </div>
+        </div>
+
         <!-- Main Application -->
-        <template v-else>
+        <template v-else-if="currentUser">
             <header class="header">
                 <div class="header-content">
                     <div class="logo">Semoga diberkahi Allah, aamiin.</div>
@@ -759,7 +763,7 @@
                     <!-- Employee Dashboard -->
                     <div v-if="currentUser.role === 'employee'">
                         <div class="page-header">
-                            <h1 class="page-title">Dasbor Pegawai</h1>
+                            <h1 class="page-title">Dasbor pegawai</h1>
                             <p class="page-subtitle">Assalamualaikum, {{ currentUser.name }}!</p>
                         </div>
                         
@@ -778,16 +782,16 @@
                             </div>
                             <div v-else>
                                 <div class="attendance-options">
-                                    <button @click="markAttendance('present')" class="attendance-btn success">
+                                    <button @click="markAttendance('present')" class="attendance-btn success" :disabled="loading">
                                         Hadir
                                     </button>
-                                    <button @click="showLeaveModal('sick')" class="attendance-btn">
+                                    <button @click="showLeaveModal('sick')" class="attendance-btn" :disabled="loading">
                                         Sakit
                                     </button>
-                                    <button @click="showLeaveModal('personal')" class="attendance-btn">
+                                    <button @click="showLeaveModal('personal')" class="attendance-btn" :disabled="loading">
                                         Izin
                                     </button>
-                                    <button @click="showLeaveModal('field-work')" class="attendance-btn">
+                                    <button @click="showLeaveModal('field-work')" class="attendance-btn" :disabled="loading">
                                         Tugas diluar
                                     </button>
                                 </div>
@@ -818,6 +822,7 @@
                                         min="0" 
                                         :max="kpi.target"
                                         step="1"
+                                        :disabled="loading"
                                     >
                                     <span>/ {{ kpi.target }}</span>
                                     <div class="kpi-percentage">
@@ -844,10 +849,11 @@
                                     class="form-control" 
                                     rows="3" 
                                     placeholder="Jelaskan apa yang telah Anda selesaikan hari ini..."
+                                    :disabled="loading"
                                 ></textarea>
                             </div>
-                            <button @click="addDailyTask" class="btn btn-primary" style="margin-bottom: 24px;">
-                                Tambah Tugas
+                            <button @click="addDailyTask" class="btn btn-primary" style="margin-bottom: 24px;" :disabled="loading || !newTask.description.trim()">
+                                {{ loading ? 'Menambah...' : 'Tambah Tugas' }}
                             </button>
 
                             <!-- Today's Tasks -->
@@ -856,7 +862,7 @@
                                 <div v-for="task in todayTasks" :key="task.id" class="task-item">
                                     <div class="task-header">
                                         <span class="task-date">{{ formatTime(task.timestamp) }}</span>
-                                        <button @click="deleteTask(task.id)" class="btn btn-danger btn-small">Hapus</button>
+                                        <button @click="deleteTask(task.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
                                     </div>
                                     <div class="task-description">{{ task.description }}</div>
                                 </div>
@@ -877,15 +883,15 @@
                             </div>
                             <div class="grid grid-3">
                                 <div class="card stat-card">
-                                    <div class="stat-number">{{ totalEmployees }}</div>
+                                    <div class="stat-number">{{ employees ? employees.length : 0 }}</div>
                                     <div class="stat-label">Total Karyawan</div>
                                 </div>
                                 <div class="card stat-card">
-                                    <div class="stat-number">{{ presentToday }}</div>
+                                    <div class="stat-number">{{ presentToday || 0 }}</div>
                                     <div class="stat-label">Hadir Hari Ini</div>
                                 </div>
                                 <div class="card stat-card">
-                                    <div class="stat-number">{{ totalKpis }}</div>
+                                    <div class="stat-number">{{ kpis ? kpis.length : 0 }}</div>
                                     <div class="stat-label">KPI Aktif</div>
                                 </div>
                             </div>
@@ -907,29 +913,29 @@
                                     <div class="grid grid-2">
                                         <div class="form-group">
                                             <label class="form-label">Nama Lengkap</label>
-                                            <input v-model="newEmployee.name" type="text" class="form-control" required>
+                                            <input v-model="newEmployee.name" type="text" class="form-control" required :disabled="loading">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Nama Pengguna</label>
-                                            <input v-model="newEmployee.username" type="text" class="form-control" required>
+                                            <input v-model="newEmployee.username" type="text" class="form-control" required :disabled="loading">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Kata Sandi</label>
-                                            <input v-model="newEmployee.password" type="password" class="form-control" required>
+                                            <input v-model="newEmployee.password" type="password" class="form-control" required :disabled="loading">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Posisi</label>
-                                            <select v-model="newEmployee.role" class="form-control" required>
+                                            <select v-model="newEmployee.role" class="form-control" required :disabled="loading">
                                                 <option value="employee">Karyawan</option>
                                                 <option value="admin">Admin</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="action-buttons">
-                                        <button type="submit" class="btn btn-primary">
-                                            {{ editingEmployee ? 'Perbarui Karyawan' : 'Tambah Karyawan' }}
+                                        <button type="submit" class="btn btn-primary" :disabled="loading">
+                                            {{ loading ? 'Menyimpan...' : (editingEmployee ? 'Perbarui Karyawan' : 'Tambah Karyawan') }}
                                         </button>
-                                        <button v-if="editingEmployee" @click="cancelEdit" type="button" class="btn btn-secondary">
+                                        <button v-if="editingEmployee" @click="cancelEdit" type="button" class="btn btn-secondary" :disabled="loading">
                                             Batal Edit
                                         </button>
                                     </div>
@@ -964,8 +970,8 @@
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <button @click="editEmployee(emp)" class="btn btn-warning btn-small">Edit</button>
-                                                    <button v-if="emp.id !== currentUser.id" @click="deleteEmployee(emp.id)" class="btn btn-danger btn-small">Hapus</button>
+                                                    <button @click="editEmployee(emp)" class="btn btn-warning btn-small" :disabled="loading">Edit</button>
+                                                    <button v-if="emp.id !== currentUser.id" @click="deleteEmployee(emp.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -990,31 +996,33 @@
                                     <div class="grid grid-2">
                                         <div class="form-group">
                                             <label class="form-label">Nama KPI</label>
-                                            <input v-model="newKpi.name" type="text" class="form-control" required>
+                                            <input v-model="newKpi.name" type="text" class="form-control" required :disabled="loading">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Target</label>
-                                            <input v-model.number="newKpi.target" type="number" class="form-control" required>
+                                            <input v-model.number="newKpi.target" type="number" class="form-control" required :disabled="loading">
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Tugaskan Kepada</label>
-                                            <select v-model="newKpi.assignedTo" class="form-control" multiple>
+                                            <select v-model="newKpi.assignedTo" class="form-control" multiple :disabled="loading">
                                                 <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label class="form-label">Deskripsi</label>
-                                            <input v-model="newKpi.description" type="text" class="form-control">
+                                            <input v-model="newKpi.description" type="text" class="form-control" :disabled="loading">
                                         </div>
                                         <div style="grid-column: span 2;">
-                                            <button type="submit" class="btn btn-primary">Tambah KPI</button>
+                                            <button type="submit" class="btn btn-primary" :disabled="loading">
+                                                {{ loading ? 'Menambah...' : 'Tambah KPI' }}
+                                            </button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
 
                             <!-- KPI List -->
-                            <div class="card" v-if="allKpis && allKpis.length > 0">
+                            <div class="card" v-if="kpis && kpis.length > 0">
                                 <div class="card-header">
                                     <h3 class="card-title">KPI Saat Ini</h3>
                                 </div>
@@ -1028,12 +1036,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="kpi in allKpis" :key="kpi.id">
+                                        <tr v-for="kpi in kpis" :key="kpi.id">
                                             <td style="font-weight: 600;">{{ kpi.name }}</td>
                                             <td>{{ kpi.target }}</td>
                                             <td>{{ getAssignedNames(kpi.assignedTo) }}</td>
                                             <td>
-                                                <button @click="deleteKpi(kpi.id)" class="btn btn-danger btn-small">Hapus</button>
+                                                <button @click="deleteKpi(kpi.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1041,17 +1049,36 @@
                             </div>
                         </div>
 
-                        <!-- Reports -->
+                        <!-- Reports with Month Filter -->
                         <div v-if="currentView === 'reports'">
                             <div class="page-header">
                                 <h1 class="page-title">Laporan</h1>
                                 <p class="page-subtitle">Laporan kehadiran dan kinerja</p>
                             </div>
 
+                            <!-- Month Filter -->
+                            <div class="filter-section">
+                                <div class="filter-group">
+                                    <label>Filter Bulan</label>
+                                    <select v-model="reportMonth" class="form-control" :disabled="loading">
+                                        <option v-for="(month, index) in monthNames" :key="index" :value="index">{{ month }} {{ reportYear }}</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label>Tahun</label>
+                                    <select v-model="reportYear" class="form-control" :disabled="loading">
+                                        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+                                    </select>
+                                </div>
+                                <button @click="refreshReports" class="btn btn-primary" :disabled="loading">
+                                    {{ loading ? 'Menyegarkan...' : 'Segarkan' }}
+                                </button>
+                            </div>
+                            
                             <!-- Attendance Report -->
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Laporan Kehadiran</h3>
+                                    <h3 class="card-title">Laporan Kehadiran - {{ monthNames[reportMonth] }} {{ reportYear }}</h3>
                                 </div>
                                 <table class="table">
                                     <thead>
@@ -1064,16 +1091,53 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr v-for="record in attendanceList" :key="record.id">
+                                        <tr v-for="record in filteredAttendanceReport" :key="record.id">
                                             <td style="font-weight: 600;">{{ getUserName(record.userId) }}</td>
                                             <td><span :class="['status-badge', getStatusClass(record.status)]">{{ getStatusText(record.status) }}</span></td>
                                             <td>{{ formatDate(new Date(record.timestamp)) }}</td>
                                             <td>{{ formatTime(record.timestamp) }}</td>
                                             <td>{{ record.note || '-' }}</td>
                                         </tr>
-                                        <tr v-if="!attendanceList || attendanceList.length === 0">
+                                        <tr v-if="!filteredAttendanceReport || filteredAttendanceReport.length === 0">
                                             <td colspan="5" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                                Tidak ada catatan kehadiran
+                                                Tidak ada catatan kehadiran untuk {{ monthNames[reportMonth] }} {{ reportYear }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- KPI Report -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Laporan Progres KPI - {{ monthNames[reportMonth] }} {{ reportYear }}</h3>
+                                </div>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Karyawan</th>
+                                            <th>KPI</th>
+                                            <th>Progres</th>
+                                            <th>Persentase Selesai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="report in filteredKpiReport" :key="`${report.userId}-${report.kpiId}`">
+                                            <td style="font-weight: 600;">{{ getUserName(report.userId) }}</td>
+                                            <td>{{ getKpiName(report.kpiId) }}</td>
+                                            <td>{{ report.current }} / {{ report.target }}</td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 12px;">
+                                                    <div class="progress" style="flex: 1;">
+                                                        <div class="progress-bar" :style="{width: Math.min(100, (report.current / report.target) * 100) + '%'}"></div>
+                                                    </div>
+                                                    <span style="font-weight: 600;">{{ Math.round((report.current / report.target) * 100) }}%</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="!filteredKpiReport || filteredKpiReport.length === 0">
+                                            <td colspan="4" style="text-align: center; color: var(--gray-medium); padding: 40px;">
+                                                Tidak ada data KPI tersedia untuk {{ monthNames[reportMonth] }} {{ reportYear }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1081,34 +1145,96 @@
                             </div>
                         </div>
 
-                        <!-- Employee Details -->
+                        <!-- Employee Details with Tasks -->
                         <div v-if="currentView === 'employee-details'">
                             <div class="page-header">
                                 <h1 class="page-title">Detail Karyawan</h1>
-                                <p class="page-subtitle">Laporan detail untuk setiap karyawan</p>
+                                <p class="page-subtitle">Laporan bulanan terperinci untuk setiap karyawan</p>
                             </div>
 
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Pilih Karyawan</h3>
+                                    <h3 class="card-title">Pilih Karyawan & Bulan</h3>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label">Karyawan</label>
-                                    <select v-model="selectedEmployeeId" class="form-control">
-                                        <option value="">Pilih Karyawan</option>
-                                        <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                                    </select>
+                                <div class="grid grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Karyawan</label>
+                                        <select v-model="selectedEmployeeId" class="form-control" @change="refreshEmployeeDetails" :disabled="loading">
+                                            <option value="">Pilih Karyawan</option>
+                                            <option v-for="emp in employees || []" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Bulan</label>
+                                        <select v-model="selectedMonth" class="form-control" @change="refreshEmployeeDetails" :disabled="loading">
+                                            <option v-for="(month, index) in monthNames" :key="index" :value="index">{{ month }} {{ new Date().getFullYear() }}</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
                             <template v-if="selectedEmployeeId">
-                                <!-- Employee Tasks -->
+                                <!-- Attendance Details -->
                                 <div class="card">
                                     <div class="card-header">
-                                        <h3 class="card-title">{{ getSelectedEmployeeName() }} - Tugas Harian</h3>
+                                        <h3 class="card-title">{{ getSelectedEmployeeName() }} - Detail Kehadiran ({{ monthNames[selectedMonth] }})</h3>
+                                    </div>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Tanggal</th>
+                                                <th>Status</th>
+                                                <th>Waktu</th>
+                                                <th>Catatan</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="record in selectedEmployeeAttendance || []" :key="record.id">
+                                                <td>{{ formatDate(new Date(record.timestamp)) }}</td>
+                                                <td><span :class="['status-badge', getStatusClass(record.status)]">{{ getStatusText(record.status) }}</span></td>
+                                                <td>{{ formatTime(record.timestamp) }}</td>
+                                                <td>{{ record.note || '-' }}</td>
+                                            </tr>
+                                            <tr v-if="!selectedEmployeeAttendance || selectedEmployeeAttendance.length === 0">
+                                                <td colspan="4" style="text-align: center; color: var(--gray-medium); padding: 40px;">
+                                                    Tidak ada catatan kehadiran untuk bulan ini
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- KPI Details -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Detail Progres KPI</h3>
+                                    </div>
+                                    <div v-for="kpi in selectedEmployeeKpis || []" :key="`selected-kpi-${kpi.id}`" class="kpi-item">
+                                        <div class="kpi-header">
+                                            <div class="kpi-name">{{ kpi.name }}</div>
+                                            <div class="kpi-target">Target: {{ kpi.target }}</div>
+                                        </div>
+                                        <div style="margin: 8px 0;">{{ kpi.description }}</div>
+                                        <div class="progress">
+                                            <div class="progress-bar" :style="{width: Math.min(100, (kpi.current / kpi.target * 100)) + '%'}"></div>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                                            <span>{{ kpi.current }} / {{ kpi.target }}</span>
+                                            <span style="font-weight: 600;">{{ Math.round((kpi.current / kpi.target) * 100) }}%</span>
+                                        </div>
+                                    </div>
+                                    <div v-if="!selectedEmployeeKpis || selectedEmployeeKpis.length === 0" style="text-align: center; color: var(--gray-medium); padding: 40px;">
+                                        Tidak ada KPI yang ditugaskan kepada karyawan ini
+                                    </div>
+                                </div>
+
+                                <!-- Daily Tasks Details -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Tugas Harian (Non-KPI) - {{ monthNames[selectedMonth] }}</h3>
                                     </div>
                                     <div v-if="selectedEmployeeTasks && selectedEmployeeTasks.length > 0">
-                                        <div v-for="task in selectedEmployeeTasks" :key="task.id" class="task-item">
+                                        <div v-for="task in selectedEmployeeTasks" :key="`task-${task.id}`" class="task-item">
                                             <div class="task-header">
                                                 <span class="task-date">{{ formatDate(new Date(task.timestamp)) }} - {{ formatTime(task.timestamp) }}</span>
                                             </div>
@@ -1116,7 +1242,7 @@
                                         </div>
                                     </div>
                                     <div v-else style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                        Tidak ada tugas harian yang dicatat
+                                        Tidak ada tugas harian yang dicatat untuk bulan ini
                                     </div>
                                 </div>
                             </template>
@@ -1133,11 +1259,13 @@
                 <form @submit.prevent="submitLeaveRequest">
                     <div class="form-group">
                         <label class="form-label">Alasan / Catatan</label>
-                        <textarea v-model="leaveRequest.note" class="form-control" rows="4" required placeholder="Harap berikan detail..."></textarea>
+                        <textarea v-model="leaveRequest.note" class="form-control" rows="4" required placeholder="Harap berikan detail..." :disabled="loading"></textarea>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" @click="closeModal" class="btn btn-secondary">Batal</button>
-                        <button type="submit" class="btn btn-primary">Kirim Permintaan</button>
+                        <button type="button" @click="closeModal" class="btn btn-secondary" :disabled="loading">Batal</button>
+                        <button type="submit" class="btn btn-primary" :disabled="loading">
+                            {{ loading ? 'Mengirim...' : 'Kirim Permintaan' }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1145,148 +1273,387 @@
     </div>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <!-- Vue.js -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
+
     <script>
-        // ===== KONFIGURASI FIREBASE =====
-        // GANTI DENGAN DATA DARI FIREBASE CONSOLE ANDA
-        const firebaseConfig = {
-            apiKey: "AIzaSyA3nXH4vEuKigPZS9ho-nPDWzxfjJkxOJ0",
-            authDomain: "absensikantor-4db17.firebaseapp.com",
-            databaseURL: "https://absensikantor-4db17-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "absensikantor-4db17",
-            storageBucket: "absensikantor-4db17.firebasestorage.app",
-            messagingSenderId: "90749171013",
-            appId: "1:90749171013:web:9b143aa2d93f680de1ba2c"
-        };
+        // Firebase Configuration - GANTI DENGAN CONFIG ANDA
+    const firebaseConfig = {
+    apiKey: "AIzaSyA3nXH4vEuKigPZS9ho-nPDWzxfjJkxOJ0",
+    authDomain: "absensikantor-4db17.firebaseapp.com",
+    databaseURL: "https://absensikantor-4db17-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "absensikantor-4db17",
+    storageBucket: "absensikantor-4db17.firebasestorage.app",
+    messagingSenderId: "90749171013",
+    appId: "1:90749171013:web:3187a1d930864da4e1ba2c"
+    };
+
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        // Initialize Firebase
+        let app, db, auth;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            auth = firebase.auth();
+            
+            // Enable offline persistence
+            db.enablePersistence().catch((err) => {
+                console.log('Firebase persistence error:', err);
+            });
+            
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            alert('Gagal menghubungkan ke server. Silakan refresh halaman.');
+        }
 
-        const { createApp, ref, computed, onMounted, reactive, nextTick, watch, onUnmounted } = Vue;
+        // Firebase Store Class
+        class FirebaseStore {
+            constructor() {
+                this.isOnline = navigator.onLine;
+                this.setupNetworkListener();
+                this.updateConnectionStatus();
+            }
+
+            setupNetworkListener() {
+                window.addEventListener('online', () => {
+                    this.isOnline = true;
+                    this.updateConnectionStatus();
+                });
+                
+                window.addEventListener('offline', () => {
+                    this.isOnline = false;
+                    this.updateConnectionStatus();
+                });
+            }
+
+            updateConnectionStatus() {
+                const statusEl = document.getElementById('connection-status');
+                if (this.isOnline) {
+                    statusEl.className = 'connection-status connected';
+                    statusEl.textContent = '🟢 Terhubung ke Firebase';
+                } else {
+                    statusEl.className = 'connection-status disconnected';
+                    statusEl.textContent = '🔴 Offline - Data tersimpan lokal';
+                }
+            }
+
+            // User Operations
+            async addUser(user) {
+                try {
+                    const docRef = await db.collection('users').add({
+                        ...user,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return { ...user, id: docRef.id };
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    throw error;
+                }
+            }
+
+            async getUsers() {
+                try {
+                    const snapshot = await db.collection('users').get();
+                    return snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error('Error getting users:', error);
+                    return [];
+                }
+            }
+
+            async updateUser(userId, userData) {
+                try {
+                    await db.collection('users').doc(userId).update({
+                        ...userData,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                    throw error;
+                }
+            }
+
+            async deleteUser(userId) {
+                try {
+                    // Delete user
+                    await db.collection('users').doc(userId).delete();
+                    
+                    // Clean up related data
+                    const attendanceSnapshot = await db.collection('attendance')
+                        .where('userId', '==', userId).get();
+                    const tasksSnapshot = await db.collection('dailyTasks')
+                        .where('userId', '==', userId).get();
+                    const kpiProgressSnapshot = await db.collection('kpiProgress')
+                        .where('userId', '==', userId).get();
+                    
+                    const batch = db.batch();
+                    
+                    attendanceSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+                    tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+                    kpiProgressSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+                    
+                    await batch.commit();
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    throw error;
+                }
+            }
+
+            // KPI Operations
+            async addKpi(kpi) {
+                try {
+                    const docRef = await db.collection('kpis').add({
+                        ...kpi,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return { ...kpi, id: docRef.id };
+                } catch (error) {
+                    console.error('Error adding KPI:', error);
+                    throw error;
+                }
+            }
+
+            async getKpis() {
+                try {
+                    const snapshot = await db.collection('kpis').get();
+                    return snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                } catch (error) {
+                    console.error('Error getting KPIs:', error);
+                    return [];
+                }
+            }
+
+            async deleteKpi(kpiId) {
+                try {
+                    // Delete KPI
+                    await db.collection('kpis').doc(kpiId).delete();
+                    
+                    // Clean up related progress data
+                    const progressSnapshot = await db.collection('kpiProgress')
+                        .where('kpiId', '==', kpiId).get();
+                    
+                    const batch = db.batch();
+                    progressSnapshot.docs.forEach(doc => batch.delete(doc.ref));
+                    await batch.commit();
+                } catch (error) {
+                    console.error('Error deleting KPI:', error);
+                    throw error;
+                }
+            }
+
+            // Attendance Operations
+            async addAttendance(record) {
+                try {
+                    const docRef = await db.collection('attendance').add({
+                        ...record,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return { ...record, id: docRef.id };
+                } catch (error) {
+                    console.error('Error adding attendance:', error);
+                    throw error;
+                }
+            }
+
+            async getAttendance() {
+                try {
+                    const snapshot = await db.collection('attendance')
+                        .orderBy('timestamp', 'desc')
+                        .get();
+                    return snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        timestamp: doc.data().timestamp?.toDate?.() || new Date()
+                    }));
+                } catch (error) {
+                    console.error('Error getting attendance:', error);
+                    return [];
+                }
+            }
+
+            // Daily Tasks Operations
+            async addDailyTask(task) {
+                try {
+                    const docRef = await db.collection('dailyTasks').add({
+                        ...task,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return { ...task, id: docRef.id };
+                } catch (error) {
+                    console.error('Error adding task:', error);
+                    throw error;
+                }
+            }
+
+            async getDailyTasks() {
+                try {
+                    const snapshot = await db.collection('dailyTasks')
+                        .orderBy('timestamp', 'desc')
+                        .get();
+                    return snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        timestamp: doc.data().timestamp?.toDate?.() || new Date()
+                    }));
+                } catch (error) {
+                    console.error('Error getting daily tasks:', error);
+                    return [];
+                }
+            }
+
+            async deleteDailyTask(taskId) {
+                try {
+                    await db.collection('dailyTasks').doc(taskId).delete();
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                    throw error;
+                }
+            }
+
+            // KPI Progress Operations
+            async updateKpiProgress(userId, kpiId, current, month, year) {
+                try {
+                    const progressId = `${userId}_${kpiId}_${month}_${year}`;
+                    await db.collection('kpiProgress').doc(progressId).set({
+                        userId,
+                        kpiId,
+                        current: Number(current),
+                        month,
+                        year,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                } catch (error) {
+                    console.error('Error updating KPI progress:', error);
+                    throw error;
+                }
+            }
+
+            async getKpiProgress() {
+                try {
+                    const snapshot = await db.collection('kpiProgress').get();
+                    const progress = {};
+                    snapshot.docs.forEach(doc => {
+                        const data = doc.data();
+                        const key = `${data.userId}-${data.kpiId}-${data.month}-${data.year}`;
+                        progress[key] = {
+                            current: data.current,
+                            timestamp: data.updatedAt?.toDate?.() || new Date()
+                        };
+                    });
+                    return progress;
+                } catch (error) {
+                    console.error('Error getting KPI progress:', error);
+                    return {};
+                }
+            }
+
+            // Initialize with demo data if needed
+            async initializeDemoData() {
+    try {
+        if (!db) {
+            console.log('Firebase not ready, skipping demo data');
+            return;
+        }
+        
+        const users = await this.getUsers();
+        if (users.length === 0) {
+            console.log('Creating demo users...');
+            
+            // Add demo users
+            await this.addUser({
+                name: 'Admin User',
+                username: 'admin',
+                password: 'admin123',
+                role: 'admin'
+            });
+
+            await this.addUser({
+                name: 'Syafiq',
+                username: 'Syafiq',
+                password: '1',
+                role: 'employee'
+            });
+
+            console.log('Demo data initialized successfully');
+        } else {
+            console.log('Demo data already exists');
+        }
+    } catch (error) {
+        console.error('Error initializing demo data:', error);
+        // Create fallback users in memory
+        this.fallbackUsers = [
+            { id: 1, name: 'Admin User', username: 'admin', password: 'admin123', role: 'admin' },
+            { id: 2, name: 'Syafiq', username: 'Syafiq', password: '1', role: 'employee' }
+        ];
+    }
+}
+        }
+
+        // Global store instance
+        const store = new FirebaseStore();
+
+        const { createApp, ref, computed, onMounted, reactive, nextTick, watch } = Vue;
 
         createApp({
             setup() {
-                // ===== STATE =====
-                const firebaseLoading = ref(true);
-                const firebaseError = ref('');
+                // State
                 const currentUser = ref(null);
                 const currentView = ref('dashboard');
                 const loginForm = reactive({ username: '', password: '' });
                 const loginError = ref('');
                 const showModal = ref(false);
                 const leaveRequest = reactive({ type: '', note: '' });
+                const newKpi = reactive({ name: '', target: 0, assignedTo: [], description: '' });
+                const newTask = reactive({ description: '' });
+                const loading = ref(false);
                 
                 // Employee management
                 const newEmployee = reactive({ name: '', username: '', password: '', role: 'employee' });
                 const editingEmployee = ref(null);
                 
-                // KPI management
-                const newKpi = reactive({ name: '', target: 0, assignedTo: [], description: '' });
-                
-                // Tasks
-                const newTask = reactive({ description: '' });
-                
-                // Employee details
+                // Employee details state
                 const selectedEmployeeId = ref('');
+                const selectedMonth = ref(new Date().getMonth());
                 
-                // Firebase data
-                const users = ref({});
-                const kpis = ref({});
-                const attendance = ref({});
-                const dailyTasks = ref({});
+                // Reports filter
+                const reportMonth = ref(new Date().getMonth());
+                const reportYear = ref(new Date().getFullYear());
+                
+                // Data stores
+                const allUsers = ref([]);
+                const kpis = ref([]);
+                const attendance = ref([]);
+                const dailyTasks = ref([]);
                 const kpiProgress = ref({});
                 
-                // Month names
+                // Month names in Indonesian
                 const monthNames = [
                     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
                 ];
 
-                // ===== FIREBASE SETUP =====
-                onMounted(async () => {
-                    try {
-                        // Check connection
-                        const connectedRef = database.ref('.info/connected');
-                        connectedRef.on('value', (snapshot) => {
-                            const connected = snapshot.val();
-                            const statusEl = document.getElementById('connection-status');
-                            if (statusEl) {
-                                statusEl.textContent = connected ? 'Online' : 'Offline';
-                                statusEl.className = `connection-status ${connected ? 'online' : 'offline'}`;
-                            }
-                        });
-
-                        // Initialize data if empty
-                        const snapshot = await database.ref().once('value');
-                        if (!snapshot.exists()) {
-                            const initialData = {
-                                users: {
-                                    1: { id: 1, name: 'Admin User', username: 'admin', password: 'admin123', role: 'admin' },
-                                    2: { id: 2, name: 'Syafiq', username: 'Syafiq', password: '1', role: 'employee' }
-                                },
-                                kpis: {
-                                    1: { id: 1, name: 'Target bikin konten nganu', target: 100, assignedTo: [2], description: 'mari' }
-                                },
-                                attendance: {},
-                                dailyTasks: {},
-                                kpiProgress: {}
-                            };
-                            await database.ref().set(initialData);
-                        }
-
-                        // Setup listeners
-                        database.ref('users').on('value', (snapshot) => {
-                            users.value = snapshot.val() || {};
-                        });
-
-                        database.ref('kpis').on('value', (snapshot) => {
-                            kpis.value = snapshot.val() || {};
-                        });
-
-                        database.ref('attendance').on('value', (snapshot) => {
-                            attendance.value = snapshot.val() || {};
-                        });
-
-                        database.ref('dailyTasks').on('value', (snapshot) => {
-                            dailyTasks.value = snapshot.val() || {};
-                        });
-
-                        database.ref('kpiProgress').on('value', (snapshot) => {
-                            kpiProgress.value = snapshot.val() || {};
-                        });
-
-                        // Hide loading
-                        setTimeout(() => {
-                            firebaseLoading.value = false;
-                            document.getElementById('firebase-loading').classList.add('hide');
-                        }, 2000);
-
-                    } catch (error) {
-                        console.error('Firebase setup error:', error);
-                        firebaseError.value = 'Gagal menghubungkan ke Firebase. Periksa konfigurasi.';
-                        firebaseLoading.value = false;
-                    }
+                // Available years for filter
+                const availableYears = computed(() => {
+                    const currentYear = new Date().getFullYear();
+                    return [currentYear - 1, currentYear, currentYear + 1];
                 });
 
-                // ===== COMPUTED PROPERTIES =====
-                const allUsers = computed(() => {
-                    return Object.values(users.value || {});
-                });
-
+                // Computed properties
                 const employees = computed(() => {
                     return allUsers.value.filter(u => u.role === 'employee');
-                });
-
-                const allKpis = computed(() => {
-                    return Object.values(kpis.value || {});
-                });
-
-                const attendanceList = computed(() => {
-                    return Object.values(attendance.value || {}).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 });
 
                 const myKpis = computed(() => {
@@ -1295,7 +1662,7 @@
                     const currentMonth = new Date().getMonth();
                     const currentYear = new Date().getFullYear();
                     
-                    return allKpis.value
+                    return kpis.value
                         .filter(kpi => Array.isArray(kpi.assignedTo) && kpi.assignedTo.includes(currentUser.value.id))
                         .map(kpi => {
                             const progressKey = `${currentUser.value.id}-${kpi.id}-${currentMonth}-${currentYear}`;
@@ -1310,97 +1677,227 @@
                 const todayTasks = computed(() => {
                     if (!currentUser.value) return [];
                     const today = new Date().toDateString();
-                    return Object.values(dailyTasks.value || {})
-                        .filter(task => 
-                            task.userId === currentUser.value.id &&
-                            new Date(task.timestamp).toDateString() === today
-                        )
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    return dailyTasks.value.filter(task => 
+                        task.userId === currentUser.value.id &&
+                        new Date(task.timestamp).toDateString() === today
+                    ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 });
 
                 const todayAttendance = computed(() => {
                     if (!currentUser.value) return null;
                     const today = new Date().toDateString();
-                    return Object.values(attendance.value || {}).find(a => 
+                    
+                    return attendance.value.find(a => 
                         a.userId === currentUser.value.id && 
                         new Date(a.timestamp).toDateString() === today
                     );
                 });
 
-                const totalEmployees = computed(() => employees.value.length);
-                const totalKpis = computed(() => allKpis.value.length);
-
                 const presentToday = computed(() => {
                     const today = new Date().toDateString();
-                    return Object.values(attendance.value || {}).filter(a => 
+                    return attendance.value.filter(a => 
                         new Date(a.timestamp).toDateString() === today && 
                         a.status === 'present'
                     ).length;
                 });
 
-                const selectedEmployeeTasks = computed(() => {
-                    if (!selectedEmployeeId.value) return [];
-                    const empId = parseInt(selectedEmployeeId.value);
-                    return Object.values(dailyTasks.value || {})
-                        .filter(task => task.userId === empId)
-                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                // Filtered reports
+                const filteredAttendanceReport = computed(() => {
+                    return attendance.value.filter(a => {
+                        const attendanceDate = new Date(a.timestamp);
+                        return attendanceDate.getMonth() === reportMonth.value && 
+                               attendanceDate.getFullYear() === reportYear.value;
+                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 });
 
-                // ===== METHODS =====
-                const login = async () => {
+                const filteredKpiReport = computed(() => {
+                    const report = [];
+                    kpis.value.forEach(kpi => {
+                        if (Array.isArray(kpi.assignedTo)) {
+                            kpi.assignedTo.forEach(userId => {
+                                const progressKey = `${userId}-${kpi.id}-${reportMonth.value}-${reportYear.value}`;
+                                const progress = kpiProgress.value[progressKey];
+                                report.push({
+                                    userId,
+                                    kpiId: kpi.id,
+                                    current: progress?.current || 0,
+                                    target: kpi.target
+                                });
+                            });
+                        }
+                    });
+                    return report;
+                });
+
+                // Employee details computed
+                const selectedEmployeeAttendance = computed(() => {
+                    if (!selectedEmployeeId.value) return [];
+                    const userId = parseInt(selectedEmployeeId.value);
+                    
+                    return attendance.value.filter(a => {
+                        const attendanceDate = new Date(a.timestamp);
+                        return a.userId === userId && 
+                               attendanceDate.getMonth() === selectedMonth.value &&
+                               attendanceDate.getFullYear() === new Date().getFullYear();
+                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                });
+
+                const selectedEmployeeKpis = computed(() => {
+                    if (!selectedEmployeeId.value) return [];
+                    const userId = parseInt(selectedEmployeeId.value);
+                    const currentYear = new Date().getFullYear();
+                    
+                    return kpis.value
+                        .filter(kpi => Array.isArray(kpi.assignedTo) && kpi.assignedTo.includes(userId))
+                        .map(kpi => {
+                            const progressKey = `${userId}-${kpi.id}-${selectedMonth.value}-${currentYear}`;
+                            return {
+                                ...kpi,
+                                current: kpiProgress.value[progressKey]?.current || 0
+                            };
+                        });
+                });
+
+                const selectedEmployeeTasks = computed(() => {
+                    if (!selectedEmployeeId.value) return [];
+                    const userId = parseInt(selectedEmployeeId.value);
+                    
+                    return dailyTasks.value.filter(task => {
+                        const taskDate = new Date(task.timestamp);
+                        return task.userId === userId && 
+                               taskDate.getMonth() === selectedMonth.value &&
+                               taskDate.getFullYear() === new Date().getFullYear();
+                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                });
+
+                // Data loading methods
+                const loadAllData = async () => {
                     try {
-                        loginError.value = '';
+                        loading.value = true;
                         
-                        if (!loginForm.username?.trim() || !loginForm.password?.trim()) {
-                            loginError.value = 'Harap masukkan nama pengguna dan kata sandi';
-                            return;
-                        }
-                        
-                        const usersList = allUsers.value;
-                        const user = usersList.find(u => 
-                            u.username === loginForm.username.trim() && 
-                            u.password === loginForm.password
-                        );
-                        
-                        if (user) {
-                            currentUser.value = user;
-                            loginError.value = '';
-                            Object.assign(loginForm, { username: '', password: '' });
-                            console.log('Login berhasil:', user.name);
-                        } else {
-                            loginError.value = 'Nama pengguna atau kata sandi salah';
-                        }
+                        const [usersData, kpisData, attendanceData, tasksData, progressData] = await Promise.all([
+                            store.getUsers(),
+                            store.getKpis(),
+                            store.getAttendance(),
+                            store.getDailyTasks(),
+                            store.getKpiProgress()
+                        ]);
+
+                        allUsers.value = usersData;
+                        kpis.value = kpisData;
+                        attendance.value = attendanceData;
+                        dailyTasks.value = tasksData;
+                        kpiProgress.value = progressData;
+
+                        console.log('All data loaded successfully');
                     } catch (error) {
-                        loginError.value = 'Login gagal. Silakan coba lagi.';
-                        console.error('Login error:', error);
+                        console.error('Error loading data:', error);
+                        alert('Gagal memuat data. Silakan refresh halaman.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
+
+                // Authentication methods
+                const login = async () => {
+    try {
+        loading.value = true;
+        loginError.value = '';
+        
+        if (!loginForm.username?.trim() || !loginForm.password?.trim()) {
+            loginError.value = 'Harap masukkan nama pengguna dan kata sandi';
+            return;
+        }
+        
+        // Try to load data from Firebase
+        try {
+            await loadAllData();
+        } catch (error) {
+            console.log('Firebase unavailable, using fallback data');
+            // Use fallback demo users if Firebase fails
+            allUsers.value = [
+                { id: 1, name: 'Admin User', username: 'admin', password: 'admin123', role: 'admin' },
+                { id: 2, name: 'Syafiq', username: 'Syafiq', password: '1', role: 'employee' }
+            ];
+        }
+        
+        const user = allUsers.value.find(u => 
+            u.username === loginForm.username.trim() && 
+            u.password === loginForm.password
+        );
+        
+        if (user) {
+            currentUser.value = user;
+            loginError.value = '';
+            Object.assign(loginForm, { username: '', password: '' });
+            console.log('Login successful:', user.name);
+        } else {
+            loginError.value = 'Nama pengguna atau kata sandi salah';
+        }
+    } catch (error) {
+        loginError.value = 'Login gagal. Silakan coba lagi.';
+        console.error('Login error:', error);
+    } finally {
+        loading.value = false;
+    }
+};
 
                 const logout = () => {
                     currentUser.value = null;
                     currentView.value = 'dashboard';
+                    Object.assign(loginForm, { username: '', password: '' });
+                    loginError.value = '';
+                    
+                    // Clear data
+                    allUsers.value = [];
+                    kpis.value = [];
+                    attendance.value = [];
+                    dailyTasks.value = [];
+                    kpiProgress.value = {};
                 };
 
                 const setView = (view) => {
                     currentView.value = view;
+                    console.log('Switching to view:', view);
+                    
+                    if (view === 'employee-details') {
+                        nextTick(() => {
+                            if (employees.value.length > 0 && !selectedEmployeeId.value) {
+                                selectedEmployeeId.value = employees.value[0].id.toString();
+                            }
+                        });
+                    }
                 };
 
+                // Attendance methods
                 const markAttendance = async (status) => {
                     try {
-                        if (!currentUser.value) return;
+                        loading.value = true;
                         
-                        const attendanceData = {
+                        if (!currentUser.value) {
+                            alert('Error: Pengguna tidak ditemukan');
+                            return;
+                        }
+                        
+                        const record = await store.addAttendance({
                             userId: currentUser.value.id,
                             status: status,
-                            note: '',
-                            timestamp: new Date().toISOString()
-                        };
+                            note: ''
+                        });
                         
-                        await database.ref('attendance').push(attendanceData);
-                        console.log('Kehadiran dicatat:', status);
+                        // Add to local state immediately
+                        attendance.value.unshift({
+                            ...record,
+                            timestamp: new Date()
+                        });
+                        
+                        console.log('Attendance recorded:', status);
                     } catch (error) {
                         console.error('Error marking attendance:', error);
                         alert('Gagal mencatat kehadiran. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
@@ -1416,72 +1913,99 @@
 
                 const submitLeaveRequest = async () => {
                     try {
+                        loading.value = true;
+                        
                         if (!leaveRequest.note?.trim()) {
                             alert('Harap berikan alasan untuk permintaan cuti Anda');
                             return;
                         }
                         
-                        if (!currentUser.value) return;
+                        if (!currentUser.value) {
+                            alert('Error: Pengguna tidak ditemukan');
+                            return;
+                        }
                         
-                        const attendanceData = {
+                        const record = await store.addAttendance({
                             userId: currentUser.value.id,
                             status: leaveRequest.type,
-                            note: leaveRequest.note.trim(),
-                            timestamp: new Date().toISOString()
-                        };
+                            note: leaveRequest.note.trim()
+                        });
                         
-                        await database.ref('attendance').push(attendanceData);
+                        // Add to local state immediately
+                        attendance.value.unshift({
+                            ...record,
+                            timestamp: new Date()
+                        });
+                        
                         closeModal();
-                        console.log('Permintaan cuti dikirim:', leaveRequest.type);
+                        console.log('Leave request submitted:', leaveRequest.type);
                     } catch (error) {
                         console.error('Error submitting leave request:', error);
                         alert('Gagal mengirim permintaan cuti. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
+                // Daily Tasks Methods
                 const addDailyTask = async () => {
                     try {
+                        loading.value = true;
+                        
                         if (!newTask.description?.trim()) {
                             alert('Harap masukkan deskripsi tugas');
                             return;
                         }
                         
-                        if (!currentUser.value) return;
+                        if (!currentUser.value) {
+                            alert('Error: Pengguna tidak ditemukan');
+                            return;
+                        }
 
-                        const taskData = {
+                        const task = await store.addDailyTask({
                             userId: currentUser.value.id,
-                            description: newTask.description.trim(),
-                            timestamp: new Date().toISOString()
-                        };
+                            description: newTask.description.trim()
+                        });
                         
-                        await database.ref('dailyTasks').push(taskData);
+                        // Add to local state immediately
+                        dailyTasks.value.unshift({
+                            ...task,
+                            timestamp: new Date()
+                        });
+                        
                         newTask.description = '';
-                        console.log('Tugas berhasil ditambahkan');
+                        console.log('Task added successfully');
                     } catch (error) {
                         console.error('Error adding task:', error);
                         alert('Gagal menambah tugas. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
                 const deleteTask = async (taskId) => {
                     try {
-                        if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
-                            const taskKey = Object.keys(dailyTasks.value).find(key => 
-                                dailyTasks.value[key].timestamp === taskId || 
-                                key === taskId ||
-                                dailyTasks.value[key].id === taskId
-                            );
-                            if (taskKey) {
-                                await database.ref(`dailyTasks/${taskKey}`).remove();
-                                console.log('Tugas dihapus');
-                            }
+                        if (!confirm('Apakah Anda yakin ingin menghapus tugas ini?')) return;
+                        
+                        loading.value = true;
+                        await store.deleteDailyTask(taskId);
+                        
+                        // Remove from local state immediately
+                        const index = dailyTasks.value.findIndex(t => t.id === taskId);
+                        if (index > -1) {
+                            dailyTasks.value.splice(index, 1);
                         }
+                        
+                        console.log('Task deleted:', taskId);
                     } catch (error) {
                         console.error('Error deleting task:', error);
                         alert('Gagal menghapus tugas. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
+                // Employee Management Methods
                 const editEmployee = (employee) => {
                     editingEmployee.value = employee;
                     Object.assign(newEmployee, { ...employee });
@@ -1494,6 +2018,8 @@
 
                 const saveEmployee = async () => {
                     try {
+                        loading.value = true;
+                        
                         if (!newEmployee.name?.trim() || !newEmployee.username?.trim() || !newEmployee.password?.trim()) {
                             alert('Harap isi semua field');
                             return;
@@ -1512,38 +2038,71 @@
 
                         if (editingEmployee.value) {
                             // Update existing employee
-                            await database.ref(`users/${editingEmployee.value.id}`).update(newEmployee);
-                            console.log('Karyawan diperbarui:', newEmployee.name);
+                            await store.updateUser(editingEmployee.value.id, { ...newEmployee });
+                            
+                            // Update local state
+                            const index = allUsers.value.findIndex(u => u.id === editingEmployee.value.id);
+                            if (index > -1) {
+                                Object.assign(allUsers.value[index], newEmployee);
+                            }
+                            
+                            console.log('Employee updated:', newEmployee.name);
                         } else {
                             // Add new employee
-                            const newId = Date.now();
-                            const userData = { ...newEmployee, id: newId };
-                            await database.ref(`users/${newId}`).set(userData);
-                            console.log('Karyawan ditambahkan:', newEmployee.name);
+                            const user = await store.addUser({ ...newEmployee });
+                            allUsers.value.push(user);
+                            console.log('Employee added:', newEmployee.name);
                         }
                         
                         cancelEdit();
                     } catch (error) {
                         console.error('Error saving employee:', error);
                         alert('Gagal menyimpan karyawan. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
                 const deleteEmployee = async (employeeId) => {
                     try {
-                        if (confirm('Apakah Anda yakin ingin menghapus karyawan ini? Semua data terkait akan dihapus.')) {
-                            await database.ref(`users/${employeeId}`).remove();
-                            console.log('Karyawan dihapus:', employeeId);
+                        if (!confirm('Apakah Anda yakin ingin menghapus karyawan ini? Semua data terkait akan dihapus.')) return;
+                        
+                        loading.value = true;
+                        await store.deleteUser(employeeId);
+                        
+                        // Remove from local state
+                        const userIndex = allUsers.value.findIndex(u => u.id === employeeId);
+                        if (userIndex > -1) {
+                            allUsers.value.splice(userIndex, 1);
                         }
+                        
+                        // Clean up related data
+                        attendance.value = attendance.value.filter(a => a.userId !== employeeId);
+                        dailyTasks.value = dailyTasks.value.filter(t => t.userId !== employeeId);
+                        
+                        // Clean up KPI progress
+                        Object.keys(kpiProgress.value).forEach(key => {
+                            if (key.startsWith(`${employeeId}-`)) {
+                                delete kpiProgress.value[key];
+                            }
+                        });
+                        
+                        console.log('Employee deleted:', employeeId);
                     } catch (error) {
                         console.error('Error deleting employee:', error);
                         alert('Gagal menghapus karyawan. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
+                // KPI Methods
                 const updateKpiProgress = async (kpi, event) => {
                     try {
-                        if (!currentUser.value) return;
+                        if (!currentUser.value) {
+                            alert('Error: Pengguna tidak ditemukan');
+                            return;
+                        }
                         
                         const newValue = Number(event.target.value) || 0;
                         const validValue = Math.max(0, Math.min(newValue, kpi.target));
@@ -1551,14 +2110,16 @@
                         const currentMonth = new Date().getMonth();
                         const currentYear = new Date().getFullYear();
                         
+                        await store.updateKpiProgress(currentUser.value.id, kpi.id, validValue, currentMonth, currentYear);
+                        
+                        // Update local state immediately
                         const progressKey = `${currentUser.value.id}-${kpi.id}-${currentMonth}-${currentYear}`;
-                        const progressData = {
+                        kpiProgress.value[progressKey] = {
                             current: validValue,
-                            timestamp: new Date().toISOString()
+                            timestamp: new Date()
                         };
                         
-                        await database.ref(`kpiProgress/${progressKey}`).set(progressData);
-                        console.log(`KPI Diperbarui: ${kpi.name} = ${validValue}/${kpi.target}`);
+                        console.log(`KPI Updated: ${kpi.name} = ${validValue}/${kpi.target}`);
                     } catch (error) {
                         console.error('Error updating KPI:', error);
                         alert('Gagal memperbarui KPI. Silakan coba lagi.');
@@ -1567,42 +2128,87 @@
 
                 const addKpi = async () => {
                     try {
+                        loading.value = true;
+                        
                         if (!newKpi.name?.trim() || newKpi.target <= 0 || !Array.isArray(newKpi.assignedTo) || newKpi.assignedTo.length === 0) {
                             alert('Harap isi semua field dengan benar dan tugaskan kepada minimal satu karyawan');
                             return;
                         }
                         
-                        const newId = Date.now();
-                        const kpiData = { 
+                        const kpi = await store.addKpi({ 
                             ...newKpi,
-                            id: newId,
                             name: newKpi.name.trim(),
                             description: newKpi.description?.trim() || '',
                             assignedTo: [...newKpi.assignedTo]
-                        };
+                        });
                         
-                        await database.ref(`kpis/${newId}`).set(kpiData);
+                        kpis.value.push(kpi);
                         Object.assign(newKpi, { name: '', target: 0, assignedTo: [], description: '' });
-                        console.log('KPI berhasil ditambahkan');
+                        console.log('KPI added successfully');
                     } catch (error) {
                         console.error('Error adding KPI:', error);
                         alert('Gagal menambah KPI. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
                 const deleteKpi = async (kpiId) => {
                     try {
-                        if (confirm('Apakah Anda yakin ingin menghapus KPI ini? Semua data progres akan dihapus.')) {
-                            await database.ref(`kpis/${kpiId}`).remove();
-                            console.log('KPI dihapus:', kpiId);
+                        if (!confirm('Apakah Anda yakin ingin menghapus KPI ini? Semua data progres akan dihapus.')) return;
+                        
+                        loading.value = true;
+                        await store.deleteKpi(kpiId);
+                        
+                        // Remove from local state
+                        const index = kpis.value.findIndex(k => k.id === kpiId);
+                        if (index > -1) {
+                            kpis.value.splice(index, 1);
                         }
+                        
+                        // Clean up progress data
+                        Object.keys(kpiProgress.value).forEach(key => {
+                            if (key.includes(`-${kpiId}-`)) {
+                                delete kpiProgress.value[key];
+                            }
+                        });
+                        
+                        console.log('KPI deleted:', kpiId);
                     } catch (error) {
                         console.error('Error deleting KPI:', error);
                         alert('Gagal menghapus KPI. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
                     }
                 };
 
-                // ===== UTILITY FUNCTIONS =====
+                // Reports Methods
+                const refreshReports = async () => {
+                    try {
+                        loading.value = true;
+                        console.log(`Refreshing reports for ${monthNames[reportMonth.value]} ${reportYear.value}`);
+                        await loadAllData();
+                    } catch (error) {
+                        console.error('Error refreshing reports:', error);
+                        alert('Gagal menyegarkan laporan. Silakan coba lagi.');
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const refreshEmployeeDetails = async () => {
+                    try {
+                        loading.value = true;
+                        console.log('Refreshing employee details...');
+                        await loadAllData();
+                    } catch (error) {
+                        console.error('Error refreshing employee details:', error);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                // Utility functions
                 const formatDate = (date) => {
                     try {
                         return date.toLocaleDateString('id-ID', { 
@@ -1612,6 +2218,7 @@
                             day: 'numeric' 
                         });
                     } catch (error) {
+                        console.error('Error formatting date:', error);
                         return 'Format tanggal error';
                     }
                 };
@@ -1623,152 +2230,229 @@
                             minute: '2-digit'
                         });
                     } catch (error) {
+                        console.error('Error formatting time:', error);
                         return 'Format waktu error';
                     }
                 };
 
                 const getUserName = (userId) => {
-                    const user = allUsers.value.find(u => u.id === userId);
-                    return user ? user.name : 'Pengguna Tidak Dikenal';
+                    try {
+                        const user = allUsers.value.find(u => u.id === userId);
+                        return user ? user.name : 'Pengguna Tidak Dikenal';
+                    } catch (error) {
+                        console.error('Error getting user name:', error);
+                        return 'Error Nama Pengguna';
+                    }
                 };
 
-const getAssignedNames = (userIds) => {
-                   if (!Array.isArray(userIds)) return 'Data tidak valid';
-                   return userIds.map(id => getUserName(id)).join(', ');
-               };
+                const getKpiName = (kpiId) => {
+                    try {
+                        const kpi = kpis.value.find(k => k.id === kpiId);
+                        return kpi ? kpi.name : 'KPI Tidak Dikenal';
+                    } catch (error) {
+                        console.error('Error getting KPI name:', error);
+                        return 'Error Nama KPI';
+                    }
+                };
 
-               const getAttendanceStatus = (userId) => {
-                   try {
-                       const today = new Date().toDateString();
-                       const record = Object.values(attendance.value || {}).find(a => 
-                           a.userId === userId && 
-                           new Date(a.timestamp).toDateString() === today
-                       );
-                       
-                       if (!record) return 'status-absent';
-                       
-                       switch(record.status) {
-                           case 'present': return 'status-present';
-                           case 'sick': return 'status-sick';
-                           case 'personal': return 'status-leave';
-                           case 'field-work': return 'status-field-work';
-                           default: return 'status-absent';
-                       }
-                   } catch (error) {
-                       return 'status-absent';
-                   }
-               };
+                const getAssignedNames = (userIds) => {
+                    try {
+                        if (!Array.isArray(userIds)) return 'Data tidak valid';
+                        return userIds.map(id => getUserName(id)).join(', ');
+                    } catch (error) {
+                        console.error('Error getting assigned names:', error);
+                        return 'Error Nama Penugasan';
+                    }
+                };
 
-               const getAttendanceStatusText = (userId) => {
-                   try {
-                       const today = new Date().toDateString();
-                       const record = Object.values(attendance.value || {}).find(a => 
-                           a.userId === userId && 
-                           new Date(a.timestamp).toDateString() === today
-                       );
-                       
-                       if (!record) return 'Belum Dicatat';
-                       return getStatusText(record.status);
-                   } catch (error) {
-                       return 'Error Status';
-                   }
-               };
+                const getAttendanceStatus = (userId) => {
+                    try {
+                        const today = new Date().toDateString();
+                        const record = attendance.value.find(a => 
+                            a.userId === userId && 
+                            new Date(a.timestamp).toDateString() === today
+                        );
+                        
+                        if (!record) return 'status-absent';
+                        
+                        switch(record.status) {
+                            case 'present': return 'status-present';
+                            case 'sick': return 'status-sick';
+                            case 'personal': return 'status-leave';
+                            case 'field-work': return 'status-field-work';
+                            default: return 'status-absent';
+                        }
+                    } catch (error) {
+                        console.error('Error getting attendance status:', error);
+                        return 'status-absent';
+                    }
+                };
 
-               const getStatusClass = (status) => {
-                   switch(status) {
-                       case 'present': return 'status-present';
-                       case 'sick': return 'status-sick';
-                       case 'personal': return 'status-leave';
-                       case 'field-work': return 'status-field-work';
-                       default: return 'status-absent';
-                   }
-               };
+                const getAttendanceStatusText = (userId) => {
+                    try {
+                        const today = new Date().toDateString();
+                        const record = attendance.value.find(a => 
+                            a.userId === userId && 
+                            new Date(a.timestamp).toDateString() === today
+                        );
+                        
+                        if (!record) return 'Belum Dicatat';
+                        return getStatusText(record.status);
+                    } catch (error) {
+                        console.error('Error getting attendance status text:', error);
+                        return 'Error Status';
+                    }
+                };
 
-               const getStatusText = (status) => {
-                   switch(status) {
-                       case 'present': return 'Hadir';
-                       case 'sick': return 'Cuti Sakit';
-                       case 'personal': return 'Cuti Pribadi';
-                       case 'field-work': return 'Kerja Lapangan';
-                       default: return 'Belum Dicatat';
-                   }
-               };
+                const getStatusClass = (status) => {
+                    try {
+                        switch(status) {
+                            case 'present': return 'status-present';
+                            case 'sick': return 'status-sick';
+                            case 'personal': return 'status-leave';
+                            case 'field-work': return 'status-field-work';
+                            default: return 'status-absent';
+                        }
+                    } catch (error) {
+                        console.error('Error getting status class:', error);
+                        return 'status-absent';
+                    }
+                };
 
-               const getLeaveTitle = () => {
-                   switch(leaveRequest.type) {
-                       case 'sick': return 'Permintaan Cuti Sakit';
-                       case 'personal': return 'Permintaan Cuti Pribadi';
-                       case 'field-work': return 'Permintaan Kerja Lapangan';
-                       default: return 'Permintaan Cuti';
-                   }
-               };
+                const getStatusText = (status) => {
+                    try {
+                        switch(status) {
+                            case 'present': return 'Hadir';
+                            case 'sick': return 'Cuti Sakit';
+                            case 'personal': return 'Cuti Pribadi';
+                            case 'field-work': return 'Kerja Lapangan';
+                            default: return 'Belum Dicatat';
+                        }
+                    } catch (error) {
+                        console.error('Error getting status text:', error);
+                        return 'Error Status';
+                    }
+                };
 
-               const getSelectedEmployeeName = () => {
-                   if (!selectedEmployeeId.value) return '';
-                   const emp = employees.value.find(e => e.id === parseInt(selectedEmployeeId.value));
-                   return emp ? emp.name : 'Karyawan Tidak Dikenal';
-               };
+                const getLeaveTitle = () => {
+                    try {
+                        switch(leaveRequest.type) {
+                            case 'sick': return 'Permintaan Cuti Sakit';
+                            case 'personal': return 'Permintaan Cuti Pribadi';
+                            case 'field-work': return 'Permintaan Kerja Lapangan';
+                            default: return 'Permintaan Cuti';
+                        }
+                    } catch (error) {
+                        console.error('Error getting leave title:', error);
+                        return 'Permintaan Cuti';
+                    }
+                };
 
-               return {
-                   // State
-                   firebaseLoading,
-                   firebaseError,
-                   currentUser,
-                   currentView,
-                   loginForm,
-                   loginError,
-                   showModal,
-                   leaveRequest,
-                   newEmployee,
-                   editingEmployee,
-                   newKpi,
-                   newTask,
-                   selectedEmployeeId,
-                   monthNames,
-                   
-                   // Computed
-                   allUsers,
-                   employees,
-                   allKpis,
-                   attendanceList,
-                   myKpis,
-                   todayTasks,
-                   todayAttendance,
-                   totalEmployees,
-                   totalKpis,
-                   presentToday,
-                   selectedEmployeeTasks,
-                   
-                   // Methods
-                   login,
-                   logout,
-                   setView,
-                   markAttendance,
-                   showLeaveModal,
-                   closeModal,
-                   submitLeaveRequest,
-                   addDailyTask,
-                   deleteTask,
-                   editEmployee,
-                   cancelEdit,
-                   saveEmployee,
-                   deleteEmployee,
-                   updateKpiProgress,
-                   addKpi,
-                   deleteKpi,
-                   formatDate,
-                   formatTime,
-                   getUserName,
-                   getAssignedNames,
-                   getAttendanceStatus,
-                   getAttendanceStatusText,
-                   getStatusClass,
-                   getStatusText,
-                   getLeaveTitle,
-                   getSelectedEmployeeName
-               };
-           }
-       }).mount('#app');
-   </script>
+                const getSelectedEmployeeName = () => {
+                    try {
+                        if (!selectedEmployeeId.value) return '';
+                        const emp = employees.value.find(e => e.id === parseInt(selectedEmployeeId.value));
+                        return emp ? emp.name : 'Karyawan Tidak Dikenal';
+                    } catch (error) {
+                        console.error('Error getting selected employee name:', error);
+                        return 'Error Nama Karyawan';
+                    }
+                };
+
+                // Initialize app
+                // Initialize app
+onMounted(async () => {
+    try {
+        loading.value = true;
+        console.log('HRIS App initializing...');
+        
+        // Check Firebase connection
+        if (db) {
+            try {
+                // Initialize demo data if needed
+                await store.initializeDemoData();
+            } catch (error) {
+                console.log('Demo data initialization failed, app will work with fallback data');
+            }
+        } else {
+            console.log('Firebase not available, using offline mode');
+        }
+        
+        console.log('App initialization complete');
+    } catch (error) {
+        console.error('Error during app initialization:', error);
+        console.log('App will work in fallback mode');
+    } finally {
+        loading.value = false;
+    }
+});
+                return {
+                    // State
+                    currentUser,
+                    currentView,
+                    loginForm,
+                    loginError,
+                    showModal,
+                    leaveRequest,
+                    newKpi,
+                    newTask,
+                    newEmployee,
+                    editingEmployee,
+                    selectedEmployeeId,
+                    selectedMonth,
+                    reportMonth,
+                    reportYear,
+                    loading,
+                    monthNames,
+                    availableYears,
+                    
+                    // Data
+                    allUsers,
+                    employees,
+                    kpis,
+                    myKpis,
+                    todayTasks,
+                    todayAttendance,
+                    presentToday,
+                    filteredAttendanceReport,
+                    filteredKpiReport,
+                    selectedEmployeeAttendance,
+                    selectedEmployeeKpis,
+                    selectedEmployeeTasks,
+                    
+                    // Methods
+                    login,
+                    logout,
+                    setView,
+                    markAttendance,
+                    showLeaveModal,
+                    closeModal,
+                    submitLeaveRequest,
+                    addDailyTask,
+                    deleteTask,
+                    editEmployee,
+                    cancelEdit,
+                    saveEmployee,
+                    deleteEmployee,
+                    updateKpiProgress,
+                    addKpi,
+                    deleteKpi,
+                    refreshReports,
+                    refreshEmployeeDetails,
+                    formatDate,
+                    formatTime,
+                    getUserName,
+                    getKpiName,
+                    getAssignedNames,
+                    getAttendanceStatus,
+                    getAttendanceStatusText,
+                    getStatusClass,
+                    getStatusText,
+                    getLeaveTitle,
+                    getSelectedEmployeeName
+                };
+            }
+        }).mount('#app');
+    </script>
 </body>
 </html>
