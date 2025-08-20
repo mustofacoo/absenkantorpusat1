@@ -1,2458 +1,1442 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Kinerja HRIS - Firebase</title>
+    <title>Sistem Absensi Kantor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --orange-primary: #FF6B35;
-            --orange-light: #FFE5DC;
-            --orange-dark: #E55A2B;
-            --black: #1A1A1A;
-            --gray-dark: #333333;
-            --gray-medium: #666666;
-            --gray-light: #F5F5F5;
-            --white: #FFFFFF;
-            --border: #E0E0E0;
-            --shadow: 0 2px 8px rgba(26, 26, 26, 0.1);
-            --shadow-hover: 0 4px 16px rgba(26, 26, 26, 0.15);
-            --radius: 12px;
-            --radius-small: 8px;
-        }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; 
-            background: var(--gray-light);
-            color: var(--black);
-            line-height: 1.6;
-        }
-
-        /* Layout Components */
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 24px; 
-        }
-
-        .card { 
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        .card-header {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--black);
-            margin: 0;
-        }
-
-        /* Button System */
-        .btn { 
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius-small);
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .btn-primary { 
-            background: var(--orange-primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--orange-dark);
-        }
-
-        .btn-secondary { 
-            background: var(--white);
-            color: var(--gray-dark);
-            border: 1px solid var(--border);
-        }
-
-        .btn-danger { 
-            background: #DC3545;
-            color: var(--white);
-        }
-
-        .btn-success { 
-            background: #28A745;
-            color: var(--white);
-        }
-
-        .btn-warning {
-            background: #FFC107;
-            color: var(--black);
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        /* Form Elements */
-        .form-group { 
-            margin-bottom: 20px; 
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--gray-dark);
-            font-size: 14px;
-        }
-
-        .form-control { 
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-small);
-            font-size: 14px;
-            background: var(--white);
-            transition: border-color 0.2s ease;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--orange-primary);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-        }
-
-        /* Table */
-        .table { 
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--white);
-        }
-        .table th, .table td { 
-            padding: 16px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        .table th { 
-            background: var(--gray-light);
-            font-weight: 600;
-            color: var(--gray-dark);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Header */
-        .header { 
-            background: var(--white);
-            padding: 20px 0;
-            border-bottom: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-
-        .header-content { 
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-        }
-
-        .logo { 
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--orange-primary);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            font-weight: 500;
-            color: var(--gray-dark);
-        }
-
-        /* Sidebar */
-        .sidebar { 
-            width: 280px;
-            background: var(--white);
-            min-height: calc(100vh - 80px);
-            padding: 24px;
-            border-right: 1px solid var(--border);
-        }
-
-        .sidebar-nav { 
-            list-style: none; 
-        }
-
-        .sidebar-nav li { 
-            margin-bottom: 4px; 
-        }
-
-        .sidebar-nav a { 
-            display: block;
-            padding: 16px 20px;
-            text-decoration: none;
-            color: var(--gray-dark);
-            border-radius: var(--radius-small);
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar-nav a:hover {
-            background: var(--orange-light);
-            color: var(--orange-dark);
-        }
-
-        .sidebar-nav a.active { 
-            background: var(--orange-primary);
-            color: var(--white);
-        }
-
-        /* Layout */
-        .main-layout { 
-            display: flex;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .content { 
-            flex: 1;
-            padding: 24px;
-        }
-
-        /* Grid System */
-        .grid { 
-            display: grid;
-            gap: 24px; 
-        }
-        .grid-2 { 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-        }
-        .grid-3 { 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-        }
-        .grid-4 { 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-        }
-
-        /* Stats Cards */
-        .stat-card {
-            text-align: center;
-            padding: 32px 24px;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--orange-primary);
-            margin-bottom: 8px;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--gray-medium);
-            font-weight: 500;
-        }
-
-        /* Progress Bar */
-        .progress { 
-            width: 100%;
-            height: 8px;
-            background: var(--gray-light);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 8px 0;
-        }
-
-        .progress-bar { 
-            height: 100%;
-            background: var(--orange-primary);
-            transition: width 0.3s ease;
-        }
-
-        /* Modal */
-        .modal { 
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(26, 26, 26, 0.6);
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal.show { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content { 
-            background: var(--white);
-            padding: 32px;
-            border-radius: var(--radius);
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--shadow-hover);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: var(--black);
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
-
-        /* Alerts */
-        .alert { 
-            padding: 16px 20px;
-            border-radius: var(--radius-small);
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .alert-danger { 
-            background: #F8D7DA;
-            color: #721C24;
-            border: 1px solid #F5C6CB;
-        }
-
-        .alert-success { 
-            background: #D4EDDA;
-            color: #155724;
-            border: 1px solid #C3E6CB;
-        }
-
-        .alert-warning {
-            background: #FFF3CD;
-            color: #856404;
-            border: 1px solid #FFEAA7;
-        }
-
-        /* Status Badges */
-        .status-badge { 
-            padding: 6px 12px;
-            border-radius: var(--radius-small);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-present { 
-            background: #D4EDDA;
-            color: #155724;
-        }
-
-        .status-absent { 
-            background: #F8D7DA;
-            color: #721C24;
-        }
-
-        .status-leave { 
-            background: #FFF3CD;
-            color: #856404;
-        }
-
-        .status-sick {
-            background: #F8D7DA;
-            color: #721C24;
-        }
-
-        .status-field-work {
-            background: #CCE5FF;
-            color: #004085;
-        }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 32px;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--black);
-            margin-bottom: 8px;
-        }
-
-        .page-subtitle {
-            color: var(--gray-medium);
-            font-size: 16px;
-        }
-
-        /* KPI Item */
-        .kpi-item {
-            padding: 20px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-small);
-            margin-bottom: 16px;
-            background: var(--white);
-        }
-
-        .kpi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .kpi-name {
-            font-weight: 600;
-            color: var(--black);
-        }
-
-        .kpi-target {
-            color: var(--gray-medium);
-            font-size: 14px;
-        }
-
-        .kpi-input-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 12px;
-        }
-
-        .kpi-input {
-            width: 100px;
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-small);
-            text-align: center;
-        }
-
-        .kpi-percentage {
-            padding: 8px 16px;
-            background: var(--orange-light);
-            border-radius: var(--radius-small);
-            font-weight: 700;
-            color: var(--orange-dark);
-            min-width: 60px;
-            text-align: center;
-        }
-
-        /* Attendance Options */
-        .attendance-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .attendance-btn {
-            padding: 20px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--white);
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .attendance-btn:hover {
-            border-color: var(--orange-primary);
-            background: var(--orange-light);
-        }
-
-        .attendance-btn.success {
-            border-color: #28A745;
-            color: #28A745;
-        }
-
-        .attendance-btn.success:hover {
-            background: #D4EDDA;
-        }
-
-        /* Login Page */
-        .login-container {
-            max-width: 400px;
-            margin: 80px auto;
-            padding: 24px;
-        }
-
-        .login-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 48px 32px;
-            box-shadow: var(--shadow-hover);
-            text-align: center;
-        }
-
-        .login-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--black);
-            margin-bottom: 32px;
-        }
-
-        /* Tasks Section */
-        .task-item {
-            padding: 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-small);
-            margin-bottom: 12px;
-            background: var(--white);
-        }
-
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .task-title {
-            font-weight: 600;
-            color: var(--black);
-        }
-
-        .task-date {
-            font-size: 12px;
-            color: var(--gray-medium);
-        }
-
-        .task-description {
-            color: var(--gray-dark);
-            line-height: 1.5;
-        }
-
-        /* Filter Section */
-        .filter-section {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: var(--gray-light);
-            border-radius: var(--radius-small);
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .filter-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--gray-dark);
-        }
-
-        .filter-group select {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-small);
-            background: var(--white);
-        }
-
-        /* Loading state */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* Action buttons */
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* Login Form Fix */
-        .login-form {
-            width: 100%;
-        }
-
-        /* Error message */
-        .error-message {
-            color: #721C24;
-            background: #F8D7DA;
-            padding: 8px 12px;
-            border-radius: var(--radius-small);
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        /* Firebase Connection Status */
-        .connection-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 16px;
-            border-radius: var(--radius-small);
-            font-size: 12px;
-            font-weight: 600;
-            z-index: 1001;
-        }
-
-        .connection-status.connected {
-            background: #D4EDDA;
-            color: #155724;
-        }
-
-        .connection-status.disconnected {
-            background: #F8D7DA;
-            color: #721C24;
-        }
-
-        .connection-status.loading {
-            background: #FFF3CD;
-            color: #856404;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .grid-3 { 
-                grid-template-columns: repeat(2, 1fr); 
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-layout { 
-                flex-direction: column; 
-            }
-            .sidebar { 
-                width: 100%;
-                min-height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-            .sidebar-nav { 
-                display: flex;
-                overflow-x: auto;
-                gap: 8px;
-            }
-            .sidebar-nav li { 
-                min-width: 140px;
-                margin-bottom: 0;
-            }
-            .grid-2, .grid-3, .grid-4 { 
-                grid-template-columns: 1fr; 
-            }
-            .container, .content {
-                padding: 16px;
-            }
-            .stat-number {
-                font-size: 36px;
-            }
-            .attendance-options {
-                grid-template-columns: 1fr;
-            }
-            .kpi-input-group, .filter-section {
-                flex-wrap: wrap;
-            }
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .header-content {
-                padding: 0 16px;
-            }
-            .logo {
-                font-size: 20px;
-            }
-            .user-info {
-                font-size: 14px;
-            }
-            .modal-content {
-                margin: 16px;
-                padding: 24px;
-            }
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
-<body>
-    <!-- Connection Status -->
-    <div id="connection-status" class="connection-status loading">
-        Menghubungkan ke Firebase...
+<body class="h-full bg-slate-50" x-data="attendanceApp()" x-init="init()">
+    
+    <!-- Loading Spinner -->
+    <div x-show="isLoading" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-[100]">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
     </div>
 
-    <div id="app">
-        <!-- Login Screen -->
-        <div v-if="!currentUser && !loading" class="login-container">
-            <div class="login-card">
-                <h2 class="login-title">Absensi dan KPI Kantor Pusat Ibnu Katsir</h2>
-                <div v-if="loginError" class="error-message">{{ loginError }}</div>
-                <form @submit.prevent="login" class="login-form">
-                    <div class="form-group">
-                        <label class="form-label">Nama Pengguna</label>
-                        <input v-model="loginForm.username" type="text" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Kata Sandi</label>
-                        <input v-model="loginForm.password" type="password" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;" :disabled="loading">
-                        {{ loading ? 'Memuat...' : 'Masuk' }}
+    <!-- Login Page -->
+    <div x-show="currentPage === 'login'" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="text-center">
+                <div class="mx-auto h-16 w-16 bg-blue-600 rounded-2xl flex items-center justify-center">
+                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="mt-6 text-3xl font-bold text-slate-900">Absen Kantor Pusat Ibnu Kastir</h2>
+                <p class="mt-2 text-sm text-slate-600">Bismillah | Alhamdulillah</p>
+            </div>
+
+            <div class="mt-8 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <button @click="showLogin('employee')" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 min-h-[44px]">
+                        Pegawai
                     </button>
-                </form>
-            </div>
-        </div>
+                    <button @click="showLogin('admin')" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 min-h-[44px]">
+                        Admin
+                    </button>
+                </div>
 
-        <!-- Loading Screen -->
-        <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-            <div style="text-align: center;">
-                <div style="font-size: 24px; margin-bottom: 16px;">Memuat...</div>
-                <div>Menghubungkan ke server...</div>
-            </div>
-        </div>
-
-        <!-- Main Application -->
-        <template v-else-if="currentUser">
-            <header class="header">
-                <div class="header-content">
-                    <div class="logo">Semoga diberkahi Allah, aamiin.</div>
-                    <div class="user-info">
-                        <span>{{ currentUser.name }}</span>
-                        <button @click="logout" class="btn btn-secondary">Keluar</button>
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-slate-50 text-slate-500">Akses KPI dan Amal Yaumi</span>
                     </div>
                 </div>
-            </header>
 
-            <div class="main-layout">
-                <!-- Admin Sidebar -->
-                <aside v-if="currentUser.role === 'admin'" class="sidebar">
-                    <ul class="sidebar-nav">
-                        <li><a href="#" :class="{active: currentView === 'dashboard'}" @click="setView('dashboard')">Dasbor</a></li>
-                        <li><a href="#" :class="{active: currentView === 'employees'}" @click="setView('employees')">Karyawan</a></li>
-                        <li><a href="#" :class="{active: currentView === 'tasks'}" @click="setView('tasks')">Manajemen KPI</a></li>
-                        <li><a href="#" :class="{active: currentView === 'reports'}" @click="setView('reports')">Laporan</a></li>
-                        <li><a href="#" :class="{active: currentView === 'employee-details'}" @click="setView('employee-details')">Detail Karyawan</a></li>
-                    </ul>
-                </aside>
+                <div class="grid grid-cols-2 gap-3">
+                <a href="https://quran.com/" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 min-h-[44px] items-center">
+                    KPI 
+                </a>
+                <a href="https://quran.com/" target="_blank" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 min-h-[44px] items-center">
+                    Amal Yaumi
+                </a>
+            </div>
+            </div>
+        </div>
+    </div>
 
-                <main class="content">
-                    <!-- Employee Dashboard -->
-                    <div v-if="currentUser.role === 'employee'">
-                        <div class="page-header">
-                            <h1 class="page-title">Dasbor pegawai</h1>
-                            <p class="page-subtitle">Assalamualaikum, {{ currentUser.name }}!</p>
-                        </div>
-                        
-                        <!-- Attendance -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Kehadiran - {{ formatDate(new Date()) }}</h3>
-                            </div>
-                            <div v-if="todayAttendance">
-                                <div class="alert alert-success">
-                                    <strong>Kehadiran Tercatat:</strong> {{ getStatusText(todayAttendance.status) }}
-                                    <div v-if="todayAttendance.note" style="margin-top: 8px;">
-                                        <strong>Catatan:</strong> {{ todayAttendance.note }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-else>
-                                <div class="attendance-options">
-                                    <button @click="markAttendance('present')" class="attendance-btn success" :disabled="loading">
-                                        Hadir
-                                    </button>
-                                    <button @click="showLeaveModal('sick')" class="attendance-btn" :disabled="loading">
-                                        Sakit
-                                    </button>
-                                    <button @click="showLeaveModal('personal')" class="attendance-btn" :disabled="loading">
-                                        Izin
-                                    </button>
-                                    <button @click="showLeaveModal('field-work')" class="attendance-btn" :disabled="loading">
-                                        Tugas diluar
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- KPIs -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Progres KPI - {{ monthNames[new Date().getMonth()] }} {{ new Date().getFullYear() }}</h3>
-                            </div>
-                            <div v-for="kpi in myKpis" :key="`kpi-${kpi.id}`" class="kpi-item">
-                                <div class="kpi-header">
-                                    <div class="kpi-name">{{ kpi.name }}</div>
-                                    <div class="kpi-target">Target: {{ kpi.target }}</div>
-                                </div>
-                                <div style="margin: 8px 0; color: var(--gray-medium);">{{ kpi.description }}</div>
-                                <div class="progress">
-                                    <div class="progress-bar" :style="{width: Math.min(100, (kpi.current / kpi.target) * 100) + '%'}"></div>
-                                </div>
-                                <div class="kpi-input-group">
-                                    <span>Progres:</span>
-                                    <input 
-                                        :value="kpi.current" 
-                                        @input="updateKpiProgress(kpi, $event)" 
-                                        type="number" 
-                                        class="kpi-input" 
-                                        min="0" 
-                                        :max="kpi.target"
-                                        step="1"
-                                        :disabled="loading"
-                                    >
-                                    <span>/ {{ kpi.target }}</span>
-                                    <div class="kpi-percentage">
-                                        {{ Math.round((kpi.current / kpi.target) * 100) }}%
-                                    </div>
-                                </div>
-                            </div>
-                            <div v-if="myKpis.length === 0" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                Belum ada KPI yang ditugaskan
-                            </div>
-                        </div>
-
-                        <!-- Daily Tasks -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Tugas Harian (Non-KPI)</h3>
-                            </div>
-                            
-                            <!-- Add Task Form -->
-                            <div class="form-group">
-                                <label class="form-label">Tambah Tugas Hari Ini</label>
-                                <textarea 
-                                    v-model="newTask.description" 
-                                    class="form-control" 
-                                    rows="3" 
-                                    placeholder="Jelaskan apa yang telah Anda selesaikan hari ini..."
-                                    :disabled="loading"
-                                ></textarea>
-                            </div>
-                            <button @click="addDailyTask" class="btn btn-primary" style="margin-bottom: 24px;" :disabled="loading || !newTask.description.trim()">
-                                {{ loading ? 'Menambah...' : 'Tambah Tugas' }}
+    <!-- Login Modal -->
+    <div x-show="showLoginModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-lg font-medium text-slate-900" x-text="loginType === 'employee' ? 'Login Pegawai' : 'Login Admin'"></h3>
+                <div class="mt-4 px-7 py-3">
+                    <form @submit.prevent="login()" class="space-y-4">
+                        <input x-model="loginForm.username" type="text" placeholder="Username" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <input x-model="loginForm.password" type="password" placeholder="Password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        <div class="flex space-x-2">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
+                                Login
                             </button>
+                            <button @click="closeLoginModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Today's Tasks -->
-                            <div v-if="todayTasks && todayTasks.length > 0">
-                                <h4 style="margin-bottom: 16px;">Tugas Hari Ini:</h4>
-                                <div v-for="task in todayTasks" :key="task.id" class="task-item">
-                                    <div class="task-header">
-                                        <span class="task-date">{{ formatTime(task.timestamp) }}</span>
-                                        <button @click="deleteTask(task.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
-                                    </div>
-                                    <div class="task-description">{{ task.description }}</div>
+    <!-- Employee Dashboard -->
+    <div x-show="currentPage === 'employee'" class="min-h-screen" x-cloak>
+        <!-- Mobile Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div>
+                        <h1 class="text-xl font-semibold text-slate-900">Dashboard Pegawai</h1>
+                        <p class="text-sm text-slate-600" x-text="'Halo, ' + currentUser.name"></p>
+                    </div>
+                    <button @click="logout()" class="text-slate-500 hover:text-slate-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <!-- Today's Attendance -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Absensi Hari Ini</h2>
+                <div class="text-center mb-4">
+                    <div class="text-3xl font-bold text-slate-900" x-text="currentTime"></div>
+                    <div class="text-sm text-slate-600" x-text="currentDate"></div>
+                </div>
+                
+                <div x-show="!todayAttendance" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="markAttendance('present')" class="bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 font-medium min-h-[44px] flex items-center justify-center">
+                            Hadir Tepat Waktu
+                        </button>
+                        <button @click="showAttendanceForm('late')" class="bg-amber-600 text-white py-3 px-4 rounded-lg hover:bg-amber-700 font-medium min-h-[44px] flex items-center justify-center">
+                            Terlambat
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="showAttendanceForm('sick')" class="bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 font-medium min-h-[44px] flex items-center justify-center">
+                            Sakit
+                        </button>
+                        <button @click="showAttendanceForm('leave')" class="bg-slate-600 text-white py-3 px-4 rounded-lg hover:bg-slate-700 font-medium min-h-[44px] flex items-center justify-center">
+                            Izin
+                        </button>
+                    </div>
+                    <button @click="showAttendanceForm('wfe')" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium min-h-[44px] flex items-center justify-center">
+                        Tugas diluar
+                    </button>
+                </div>
+
+                <div x-show="todayAttendance" class="text-center p-4 bg-emerald-50 rounded-lg">
+                    <div class="text-emerald-800 font-medium">Sudah absen</div>
+                    <div class="text-sm text-emerald-600 mt-1" x-text="todayAttendance ? 'Status: ' + getStatusText(todayAttendance.status) + ' pada ' + todayAttendance.time : ''"></div>
+                </div>
+            </div>
+
+            <!-- Monthly Summary -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Ringkasan Bulan Ini</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="text-center p-3 bg-emerald-50 rounded-lg">
+                        <div class="text-2xl font-bold text-emerald-600" x-text="monthlyStats.present"></div>
+                        <div class="text-sm text-emerald-700">Hadir</div>
+                    </div>
+                    <div class="text-center p-3 bg-amber-50 rounded-lg">
+                        <div class="text-2xl font-bold text-amber-600" x-text="monthlyStats.late"></div>
+                        <div class="text-sm text-amber-700">Terlambat</div>
+                    </div>
+                    <div class="text-center p-3 bg-red-50 rounded-lg">
+                        <div class="text-2xl font-bold text-red-600" x-text="monthlyStats.sick"></div>
+                        <div class="text-sm text-red-700">Sakit</div>
+                    </div>
+                    <div class="text-center p-3 bg-slate-50 rounded-lg">
+                        <div class="text-2xl font-bold text-slate-600" x-text="monthlyStats.leave"></div>
+                        <div class="text-sm text-slate-700">Izin</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent History -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Riwayat Absensi</h2>
+                <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                    <template x-for="record in attendanceHistory" :key="record.date">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                            <div>
+                                <div class="font-medium text-slate-900" x-text="formatDate(record.date)"></div>
+                                <div class="text-sm text-slate-600" x-text="record.time"></div>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getStatusClass(record.status)" x-text="getStatusText(record.status)"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div x-show="currentPage === 'admin'" class="min-h-screen" x-cloak>
+        <!-- Admin Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div>
+                        <h1 class="text-xl font-semibold text-slate-900">Dashboard Admin</h1>
+                        <p class="text-sm text-slate-600">Panel Manajemen Absensi</p>
+                    </div>
+                    <button @click="logout()" class="text-slate-500 hover:text-slate-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Admin Tabs -->
+                <div class="flex space-x-8 border-b border-slate-200">
+                    <button @click="adminTab = 'overview'" :class="adminTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
+                        Overview
+                    </button>
+                    <button @click="adminTab = 'employees'" :class="adminTab === 'employees' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
+                        Pegawai
+                    </button>
+                    <button @click="adminTab = 'attendance'" :class="adminTab === 'attendance' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
+                        Absensi
+                    </button>
+                    <button @click="adminTab = 'reports'; initChart()" :class="adminTab === 'reports' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
+                        Laporan
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <!-- Overview Tab -->
+            <div x-show="adminTab === 'overview'">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold text-slate-900" x-text="employees.length"></div>
+                                <div class="text-sm text-slate-600">Total Pegawai</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-emerald-100">
+                                <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold text-slate-900" x-text="todayPresentCount"></div>
+                                <div class="text-sm text-slate-600">Hadir Hari Ini</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-amber-100">
+                                <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-2xl font-bold text-slate-900" x-text="employees.length - todayPresentCount"></div>
+                                <div class="text-sm text-slate-600">Belum Absen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Attendance List -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4">Status Absensi Hari Ini</h2>
+                    <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                        <template x-for="employee in employees" :key="employee.id">
+                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                <div>
+                                    <div class="font-medium text-slate-900" x-text="employee.name"></div>
+                                    <div class="text-sm text-slate-600" x-text="employee.position"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getTodayStatusClass(employee.id)" x-text="getTodayStatusText(employee.id)"></span>
                                 </div>
                             </div>
-                            <div v-else style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                Belum ada tugas yang ditambahkan hari ini
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees Tab -->
+            <div x-show="adminTab === 'employees'">
+                <div class="bg-white rounded-xl shadow-sm">
+                    <div class="p-6 border-b border-slate-200">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-lg font-semibold text-slate-900">Manajemen Pegawai</h2>
+                            <button @click="showEmployeeModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
+                                + Tambah Pegawai
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-slate-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Jabatan</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <template x-for="employee in employees" :key="employee.id">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900" x-text="employee.name"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500" x-text="employee.position"></td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span :class="employee.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                                    <span x-text="employee.status === 'active' ? 'Aktif' : 'Nonaktif'"></span>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                                <button @click="editEmployee(employee)" class="text-blue-600 hover:text-blue-900">Edit</button>
+                                                <button @click="deleteEmployee(employee.id)" class="text-red-600 hover:text-red-900">Hapus</button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Tab -->
+            <div x-show="adminTab === 'attendance'">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-slate-900 mb-4">Monitoring Absensi</h2>
+                    <div class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
+                        <template x-for="record in allAttendanceRecords" :key="record.id">
+                            <div class="flex justify-between items-center p-4 bg-slate-50 rounded-lg">
+                                <div class="flex-1">
+                                    <div class="font-medium text-slate-900" x-text="getEmployeeName(record.employeeId)"></div>
+                                    <div class="text-sm text-slate-600" x-text="formatDate(record.date) + ' - ' + record.time"></div>
+                                    <div x-show="record.reason" class="text-sm text-slate-500" x-text="'Alasan: ' + record.reason"></div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getStatusClass(record.status)" x-text="getStatusText(record.status)"></span>
+                                    <button @click="editAttendanceRecord(record)" class="text-blue-600 hover:text-blue-900 text-sm">Edit</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div x-show="adminTab === 'reports'">
+                <div class="space-y-6">
+                    <!-- Monthly Report Filter -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4">Filter Laporan Bulanan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Bulan & Tahun</label>
+                                <input 
+                                    x-model="reportFilter.month" 
+                                    @change="updateReports()"
+                                    type="month" 
+                                    class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-end">
+                                <button 
+                                    @click="exportMonthlyReport()" 
+                                    class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 font-medium">
+                                    Export Excel
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Admin Views -->
-                    <div v-if="currentUser.role === 'admin'">
-                        <!-- Dashboard -->
-                        <div v-if="currentView === 'dashboard'">
-                            <div class="page-header">
-                                <h1 class="page-title">Dasbor Admin</h1>
-                                <p class="page-subtitle">Bismillah</p>
+                    <!-- Monthly Chart -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-slate-900">
+                                Laporan Absensi Bulanan - <span x-text="getSelectedMonthText()"></span>
+                            </h2>
+                        </div>
+                        <div class="mb-4 grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div class="text-center p-3 bg-emerald-50 rounded-lg">
+                                <div class="text-xl font-bold text-emerald-600" x-text="monthlyReportStats.present"></div>
+                                <div class="text-xs text-emerald-700">Hadir</div>
                             </div>
-                            <div class="grid grid-3">
-                                <div class="card stat-card">
-                                    <div class="stat-number">{{ employees ? employees.length : 0 }}</div>
-                                    <div class="stat-label">Total Karyawan</div>
-                                </div>
-                                <div class="card stat-card">
-                                    <div class="stat-number">{{ presentToday || 0 }}</div>
-                                    <div class="stat-label">Hadir Hari Ini</div>
-                                </div>
-                                <div class="card stat-card">
-                                    <div class="stat-number">{{ kpis ? kpis.length : 0 }}</div>
-                                    <div class="stat-label">KPI Aktif</div>
-                                </div>
+                            <div class="text-center p-3 bg-amber-50 rounded-lg">
+                                <div class="text-xl font-bold text-amber-600" x-text="monthlyReportStats.late"></div>
+                                <div class="text-xs text-amber-700">Terlambat</div>
+                            </div>
+                            <div class="text-center p-3 bg-red-50 rounded-lg">
+                                <div class="text-xl font-bold text-red-600" x-text="monthlyReportStats.sick"></div>
+                                <div class="text-xs text-red-700">Sakit</div>
+                            </div>
+                            <div class="text-center p-3 bg-slate-50 rounded-lg">
+                                <div class="text-xl font-bold text-slate-600" x-text="monthlyReportStats.leave"></div>
+                                <div class="text-xs text-slate-700">Izin</div>
+                            </div>
+                            <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                <div class="text-xl font-bold text-blue-600" x-text="monthlyReportStats.wfe"></div>
+                                <div class="text-xs text-blue-700">wfe</div>
                             </div>
                         </div>
-
-                        <!-- Employees Management -->
-                        <div v-if="currentView === 'employees'">
-                            <div class="page-header">
-                                <h1 class="page-title">Manajemen Karyawan</h1>
-                                <p class="page-subtitle">Kelola anggota tim Anda</p>
-                            </div>
-
-                            <!-- Add Employee -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">{{ editingEmployee ? 'Edit Karyawan' : 'Tambah Karyawan Baru' }}</h3>
-                                </div>
-                                <form @submit.prevent="saveEmployee">
-                                    <div class="grid grid-2">
-                                        <div class="form-group">
-                                            <label class="form-label">Nama Lengkap</label>
-                                            <input v-model="newEmployee.name" type="text" class="form-control" required :disabled="loading">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Nama Pengguna</label>
-                                            <input v-model="newEmployee.username" type="text" class="form-control" required :disabled="loading">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Kata Sandi</label>
-                                            <input v-model="newEmployee.password" type="password" class="form-control" required :disabled="loading">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Posisi</label>
-                                            <select v-model="newEmployee.role" class="form-control" required :disabled="loading">
-                                                <option value="employee">Karyawan</option>
-                                                <option value="admin">Admin</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="action-buttons">
-                                        <button type="submit" class="btn btn-primary" :disabled="loading">
-                                            {{ loading ? 'Menyimpan...' : (editingEmployee ? 'Perbarui Karyawan' : 'Tambah Karyawan') }}
-                                        </button>
-                                        <button v-if="editingEmployee" @click="cancelEdit" type="button" class="btn btn-secondary" :disabled="loading">
-                                            Batal Edit
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Employee List -->
-                            <div class="card" v-if="allUsers && allUsers.length > 0">
-                                <div class="card-header">
-                                    <h3 class="card-title">Daftar Karyawan</h3>
-                                </div>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama</th>
-                                            <th>Nama Pengguna</th>
-                                            <th>Peran</th>
-                                            <th>Status Hari Ini</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="emp in allUsers" :key="emp.id">
-                                            <td style="font-weight: 600;">{{ emp.name }}</td>
-                                            <td>{{ emp.username }}</td>
-                                            <td>{{ emp.role === 'admin' ? 'Admin' : 'Karyawan' }}</td>
-                                            <td>
-                                                <span v-if="emp.role === 'employee'" :class="['status-badge', getAttendanceStatus(emp.id)]">
-                                                    {{ getAttendanceStatusText(emp.id) }}
-                                                </span>
-                                                <span v-else class="status-badge" style="background: #E3F2FD; color: #1976D2;">Admin</span>
-                                            </td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button @click="editEmployee(emp)" class="btn btn-warning btn-small" :disabled="loading">Edit</button>
-                                                    <button v-if="emp.id !== currentUser.id" @click="deleteEmployee(emp.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="attendanceChart"></canvas>
                         </div>
+                    </div>
 
-                        <!-- KPI Management -->
-                        <div v-if="currentView === 'tasks'">
-                            <div class="page-header">
-                                <h1 class="page-title">Manajemen KPI</h1>
-                                <p class="page-subtitle">Buat dan kelola Indikator Kinerja Utama</p>
-                            </div>
-
-                            <!-- Add KPI -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Tambah KPI Baru</h3>
-                                </div>
-                                <form @submit.prevent="addKpi">
-                                    <div class="grid grid-2">
-                                        <div class="form-group">
-                                            <label class="form-label">Nama KPI</label>
-                                            <input v-model="newKpi.name" type="text" class="form-control" required :disabled="loading">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Target</label>
-                                            <input v-model.number="newKpi.target" type="number" class="form-control" required :disabled="loading">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Tugaskan Kepada</label>
-                                            <select v-model="newKpi.assignedTo" class="form-control" multiple :disabled="loading">
-                                                <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label">Deskripsi</label>
-                                            <input v-model="newKpi.description" type="text" class="form-control" :disabled="loading">
-                                        </div>
-                                        <div style="grid-column: span 2;">
-                                            <button type="submit" class="btn btn-primary" :disabled="loading">
-                                                {{ loading ? 'Menambah...' : 'Tambah KPI' }}
-                                            </button>
+                    <!-- Monthly Attendance Rate per Employee -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-slate-900 mb-4">
+                            Tingkat Kehadiran per Pegawai - <span x-text="getSelectedMonthText()"></span>
+                        </h3>
+                        <div class="space-y-4">
+                            <template x-for="employee in getFilteredEmployees()" :key="employee.id">
+                                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-slate-900" x-text="employee.name"></div>
+                                        <div class="text-sm text-slate-600" x-text="employee.position"></div>
+                                        <div class="text-xs text-slate-500 mt-1">
+                                            <span x-text="getMonthlyEmployeeStats(employee.id).present + ' hadir'"></span>,
+                                            <span x-text="getMonthlyEmployeeStats(employee.id).late + ' terlambat'"></span>,
+                                            <span x-text="getMonthlyEmployeeStats(employee.id).sick + ' sakit'"></span>,
+                                            <span x-text="getMonthlyEmployeeStats(employee.id).leave + ' izin'"></span>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-
-                            <!-- KPI List -->
-                            <div class="card" v-if="kpis && kpis.length > 0">
-                                <div class="card-header">
-                                    <h3 class="card-title">KPI Saat Ini</h3>
-                                </div>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Nama KPI</th>
-                                            <th>Target</th>
-                                            <th>Ditugaskan Kepada</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="kpi in kpis" :key="kpi.id">
-                                            <td style="font-weight: 600;">{{ kpi.name }}</td>
-                                            <td>{{ kpi.target }}</td>
-                                            <td>{{ getAssignedNames(kpi.assignedTo) }}</td>
-                                            <td>
-                                                <button @click="deleteKpi(kpi.id)" class="btn btn-danger btn-small" :disabled="loading">Hapus</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Reports with Month Filter -->
-                        <div v-if="currentView === 'reports'">
-                            <div class="page-header">
-                                <h1 class="page-title">Laporan</h1>
-                                <p class="page-subtitle">Laporan kehadiran dan kinerja</p>
-                            </div>
-
-                            <!-- Month Filter -->
-                            <div class="filter-section">
-                                <div class="filter-group">
-                                    <label>Filter Bulan</label>
-                                    <select v-model="reportMonth" class="form-control" :disabled="loading">
-                                        <option v-for="(month, index) in monthNames" :key="index" :value="index">{{ month }} {{ reportYear }}</option>
-                                    </select>
-                                </div>
-                                <div class="filter-group">
-                                    <label>Tahun</label>
-                                    <select v-model="reportYear" class="form-control" :disabled="loading">
-                                        <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
-                                    </select>
-                                </div>
-                                <button @click="refreshReports" class="btn btn-primary" :disabled="loading">
-                                    {{ loading ? 'Menyegarkan...' : 'Segarkan' }}
-                                </button>
-                            </div>
-                            
-                            <!-- Attendance Report -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Laporan Kehadiran - {{ monthNames[reportMonth] }} {{ reportYear }}</h3>
-                                </div>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Karyawan</th>
-                                            <th>Status</th>
-                                            <th>Tanggal</th>
-                                            <th>Waktu</th>
-                                            <th>Catatan</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="record in filteredAttendanceReport" :key="record.id">
-                                            <td style="font-weight: 600;">{{ getUserName(record.userId) }}</td>
-                                            <td><span :class="['status-badge', getStatusClass(record.status)]">{{ getStatusText(record.status) }}</span></td>
-                                            <td>{{ formatDate(new Date(record.timestamp)) }}</td>
-                                            <td>{{ formatTime(record.timestamp) }}</td>
-                                            <td>{{ record.note || '-' }}</td>
-                                        </tr>
-                                        <tr v-if="!filteredAttendanceReport || filteredAttendanceReport.length === 0">
-                                            <td colspan="5" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                                Tidak ada catatan kehadiran untuk {{ monthNames[reportMonth] }} {{ reportYear }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- KPI Report -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Laporan Progres KPI - {{ monthNames[reportMonth] }} {{ reportYear }}</h3>
-                                </div>
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Karyawan</th>
-                                            <th>KPI</th>
-                                            <th>Progres</th>
-                                            <th>Persentase Selesai</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="report in filteredKpiReport" :key="`${report.userId}-${report.kpiId}`">
-                                            <td style="font-weight: 600;">{{ getUserName(report.userId) }}</td>
-                                            <td>{{ getKpiName(report.kpiId) }}</td>
-                                            <td>{{ report.current }} / {{ report.target }}</td>
-                                            <td>
-                                                <div style="display: flex; align-items: center; gap: 12px;">
-                                                    <div class="progress" style="flex: 1;">
-                                                        <div class="progress-bar" :style="{width: Math.min(100, (report.current / report.target) * 100) + '%'}"></div>
-                                                    </div>
-                                                    <span style="font-weight: 600;">{{ Math.round((report.current / report.target) * 100) }}%</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr v-if="!filteredKpiReport || filteredKpiReport.length === 0">
-                                            <td colspan="4" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                                Tidak ada data KPI tersedia untuk {{ monthNames[reportMonth] }} {{ reportYear }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Employee Details with Tasks -->
-                        <div v-if="currentView === 'employee-details'">
-                            <div class="page-header">
-                                <h1 class="page-title">Detail Karyawan</h1>
-                                <p class="page-subtitle">Laporan bulanan terperinci untuk setiap karyawan</p>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Pilih Karyawan & Bulan</h3>
-                                </div>
-                                <div class="grid grid-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Karyawan</label>
-                                        <select v-model="selectedEmployeeId" class="form-control" @change="refreshEmployeeDetails" :disabled="loading">
-                                            <option value="">Pilih Karyawan</option>
-                                            <option v-for="emp in employees || []" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label">Bulan</label>
-                                        <select v-model="selectedMonth" class="form-control" @change="refreshEmployeeDetails" :disabled="loading">
-                                            <option v-for="(month, index) in monthNames" :key="index" :value="index">{{ month }} {{ new Date().getFullYear() }}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <template v-if="selectedEmployeeId">
-                                <!-- Attendance Details -->
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">{{ getSelectedEmployeeName() }} - Detail Kehadiran ({{ monthNames[selectedMonth] }})</h3>
-                                    </div>
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>Tanggal</th>
-                                                <th>Status</th>
-                                                <th>Waktu</th>
-                                                <th>Catatan</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr v-for="record in selectedEmployeeAttendance || []" :key="record.id">
-                                                <td>{{ formatDate(new Date(record.timestamp)) }}</td>
-                                                <td><span :class="['status-badge', getStatusClass(record.status)]">{{ getStatusText(record.status) }}</span></td>
-                                                <td>{{ formatTime(record.timestamp) }}</td>
-                                                <td>{{ record.note || '-' }}</td>
-                                            </tr>
-                                            <tr v-if="!selectedEmployeeAttendance || selectedEmployeeAttendance.length === 0">
-                                                <td colspan="4" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                                    Tidak ada catatan kehadiran untuk bulan ini
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <!-- KPI Details -->
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Detail Progres KPI</h3>
-                                    </div>
-                                    <div v-for="kpi in selectedEmployeeKpis || []" :key="`selected-kpi-${kpi.id}`" class="kpi-item">
-                                        <div class="kpi-header">
-                                            <div class="kpi-name">{{ kpi.name }}</div>
-                                            <div class="kpi-target">Target: {{ kpi.target }}</div>
+                                    <div class="text-right ml-4">
+                                        <div class="text-2xl font-bold text-slate-900" x-text="getMonthlyAttendanceRate(employee.id) + '%'"></div>
+                                        <div class="text-sm text-slate-600">Tingkat Hadir</div>
+                                        <div class="w-24 bg-slate-200 rounded-full h-2 mt-1">
+                                            <div class="bg-blue-600 h-2 rounded-full" :style="'width: ' + getMonthlyAttendanceRate(employee.id) + '%'"></div>
                                         </div>
-                                        <div style="margin: 8px 0;">{{ kpi.description }}</div>
-                                        <div class="progress">
-                                            <div class="progress-bar" :style="{width: Math.min(100, (kpi.current / kpi.target * 100)) + '%'}"></div>
-                                        </div>
-                                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
-                                            <span>{{ kpi.current }} / {{ kpi.target }}</span>
-                                            <span style="font-weight: 600;">{{ Math.round((kpi.current / kpi.target) * 100) }}%</span>
-                                        </div>
-                                    </div>
-                                    <div v-if="!selectedEmployeeKpis || selectedEmployeeKpis.length === 0" style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                        Tidak ada KPI yang ditugaskan kepada karyawan ini
-                                    </div>
-                                </div>
-
-                                <!-- Daily Tasks Details -->
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Tugas Harian (Non-KPI) - {{ monthNames[selectedMonth] }}</h3>
-                                    </div>
-                                    <div v-if="selectedEmployeeTasks && selectedEmployeeTasks.length > 0">
-                                        <div v-for="task in selectedEmployeeTasks" :key="`task-${task.id}`" class="task-item">
-                                            <div class="task-header">
-                                                <span class="task-date">{{ formatDate(new Date(task.timestamp)) }} - {{ formatTime(task.timestamp) }}</span>
-                                            </div>
-                                            <div class="task-description">{{ task.description }}</div>
-                                        </div>
-                                    </div>
-                                    <div v-else style="text-align: center; color: var(--gray-medium); padding: 40px;">
-                                        Tidak ada tugas harian yang dicatat untuk bulan ini
                                     </div>
                                 </div>
                             </template>
                         </div>
                     </div>
-                </main>
+                </div>
             </div>
-        </template>
+        </main>
+    </div>
 
-        <!-- Leave Request Modal -->
-        <div class="modal" :class="{show: showModal}" @click.self="closeModal">
-            <div class="modal-content">
-                <h3 class="modal-header">{{ getLeaveTitle() }}</h3>
-                <form @submit.prevent="submitLeaveRequest">
-                    <div class="form-group">
-                        <label class="form-label">Alasan / Catatan</label>
-                        <textarea v-model="leaveRequest.note" class="form-control" rows="4" required placeholder="Harap berikan detail..." :disabled="loading"></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" @click="closeModal" class="btn btn-secondary" :disabled="loading">Batal</button>
-                        <button type="submit" class="btn btn-primary" :disabled="loading">
-                            {{ loading ? 'Mengirim...' : 'Kirim Permintaan' }}
-                        </button>
-                    </div>
-                </form>
+    <!-- Attendance Form Modal -->
+    <div x-show="showAttendanceModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-slate-900 text-center" x-text="getAttendanceModalTitle()"></h3>
+                <div class="mt-4 px-7 py-3">
+                    <form @submit.prevent="submitAttendanceForm()" class="space-y-4">
+                        <div x-show="attendanceForm.type === 'late' || attendanceForm.type === 'leave' || attendanceForm.type === 'wfe'">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                <span x-text="attendanceForm.type === 'late' ? 'Alasan Terlambat' : (attendanceForm.type === 'leave' ? 'Alasan Izin' : 'Keterangan wfe')"></span>
+                            </label>
+                            <textarea x-model="attendanceForm.reason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
+                        </div>
+                        <div x-show="attendanceForm.type === 'sick'">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Keterangan Sakit</label>
+                            <textarea x-model="attendanceForm.reason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Contoh: Demam, sakit kepala..."></textarea>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
+                                Submit Absensi
+                            </button>
+                            <button @click="closeAttendanceModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <!-- Vue.js -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Employee Form Modal -->
+    <div x-show="showEmployeeFormModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-slate-900 text-center" x-text="employeeForm.id ? 'Edit Pegawai' : 'Tambah Pegawai Baru'"></h3>
+                <div class="mt-4 px-7 py-3">
+                    <form @submit.prevent="submitEmployeeForm()" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
+                            <input x-model="employeeForm.name" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Jabatan</label>
+                            <input x-model="employeeForm.position" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                            <input x-model="employeeForm.username" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div x-show="!employeeForm.id">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                            <input x-model="employeeForm.password" type="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" :required="!employeeForm.id">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                            <select x-model="employeeForm.status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
+                                <span x-text="employeeForm.id ? 'Update' : 'Simpan'"></span>
+                            </button>
+                            <button @click="closeEmployeeModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Attendance Modal -->
+    <div x-show="showEditAttendanceModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium text-slate-900 text-center">Edit Absensi</h3>
+                <div class="mt-4 px-7 py-3">
+                    <form @submit.prevent="submitEditAttendance()" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Pegawai</label>
+                            <input :value="getEmployeeName(editAttendanceForm.employeeId)" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-100" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal</label>
+                            <input x-model="editAttendanceForm.date" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                            <select x-model="editAttendanceForm.status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="present">Hadir</option>
+                                <option value="late">Terlambat</option>
+                                <option value="sick">Sakit</option>
+                                <option value="leave">Izin</option>
+                                <option value="wfe">wfe</option>
+                                <option value="absent">Tidak Hadir</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Catatan Admin</label>
+                            <textarea x-model="editAttendanceForm.adminNote" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Catatan tambahan..."></textarea>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
+                                Update
+                            </button>
+                            <button @click="closeEditAttendanceModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Firebase Configuration - GANTI DENGAN CONFIG ANDA
-    const firebaseConfig = {
-    apiKey: "AIzaSyA3nXH4vEuKigPZS9ho-nPDWzxfjJkxOJ0",
-    authDomain: "absensikantor-4db17.firebaseapp.com",
-    databaseURL: "https://absensikantor-4db17-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "absensikantor-4db17",
-    storageBucket: "absensikantor-4db17.firebasestorage.app",
-    messagingSenderId: "90749171013",
-    appId: "1:90749171013:web:3187a1d930864da4e1ba2c"
+        // Variabel untuk menyimpan URL dan Kunci Supabase Anda
+const supabaseUrl = 'https://vbvcydgjptjroclgcxzw.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidmN5ZGdqcHRqcm9jbGdjeHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzYwODgsImV4cCI6MjA3MDkxMjA4OH0.7qhvpdcrMktJMISBzwU-PfVdSHqDnrOQKDM18-hMYN8';
+
+// Ganti nama variabel untuk menghindari conflict
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        function attendanceApp() {
+            return {
+                // Current state
+                currentPage: 'login',
+                currentUser: null,
+                currentTime: '',
+                currentDate: '',
+                adminTab: 'overview',
+                
+                // Modals
+                showLoginModal: false,
+                showAttendanceModal: false,
+                showEmployeeFormModal: false,
+                showEditAttendanceModal: false,
+                loginType: 'employee',
+                
+                // Forms
+                loginForm: { username: '', password: '' },
+                attendanceForm: { type: '', reason: '' },
+                employeeForm: { id: null, name: '', position: '', password: '', status: 'active' },
+                editAttendanceForm: { id: null, employeeId: null, date: '', status: '', adminNote: '' },
+                reportFilter: { 
+                    month: new Date().toISOString().slice(0, 7), // Default to current month
+                },
+                
+                // Data
+                employees: [],
+                attendanceRecords: [],
+                todayAttendance: null,
+                monthlyStats: { present: 0, late: 0, sick: 0, leave: 0 },
+                monthlyReportStats: { present: 0, late: 0, sick: 0, leave: 0, wfe: 0 },
+                attendanceHistory: [],
+                allAttendanceRecords: [],
+                
+                // Chart instance
+                chartInstance: null,
+                
+                init() {
+                    this.updateDateTime();
+                    setInterval(() => this.updateDateTime(), 1000);
+                    this.loadInitialData();
+                    this.updateReports();
+                    this.updateAllAttendanceRecords();
+                },
+                
+            async loadInitialData() {
+            this.isLoading = true;
+                try {
+                    // Ganti 'supabase' menjadi 'supabaseClient'
+                    const { data: employeesData, error: employeesError } = await supabaseClient
+                        .from('employees')
+                        .select('*');
+
+                    if (employeesError) throw employeesError;
+                    this.employees = employeesData;
+
+                    const { data: attendanceData, error: attendanceError } = await supabaseClient
+                        .from('attendance_records')
+                        .select('*');
+
+                    if (attendanceError) throw attendanceError;
+                    this.attendanceRecords = attendanceData;
+
+                    if (this.currentUser) {
+                        this.updateAttendanceData();
+                    }
+                } catch (error) {
+                    console.error('Error fetching data from Supabase:', error);
+                    alert('Gagal memuat data dari database. Silakan coba lagi.');
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+                
+                generateDemoAttendanceData() {
+                    const now = new Date();
+                    const demoRecords = [];
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const today = new Date();
+                    
+                    for (let d = new Date(startOfMonth); d <= today; d.setDate(d.getDate() + 1)) {
+                        // Skip weekends
+                        if (d.getDay() === 0 || d.getDay() === 6) continue;
+                        
+                        this.employees.forEach(employee => {
+                            // Random attendance with higher probability of being present
+                            const rand = Math.random();
+                            let status = 'present';
+                            
+                            if (rand < 0.05) status = 'sick';
+                            else if (rand < 0.1) status = 'leave';
+                            else if (rand < 0.15) status = 'late';
+                            else if (rand < 0.2) status = 'wfe';
+                            
+                            demoRecords.push({
+                                id: Date.now() + Math.random(),
+                                employeeId: employee.id,
+                                date: d.toISOString().split('T')[0],
+                                time: '08:' + String(Math.floor(Math.random() * 30)).padStart(2, '0'),
+                                status: status,
+                                reason: status !== 'present' ? 'Demo data' : ''
+                            });
+                        });
+                    }
+                    
+                    this.attendanceRecords = demoRecords;
+                    this.saveAttendanceRecords();
+                },
+                
+                updateDateTime() {
+                    const now = new Date();
+                    const options = { timeZone: 'Asia/Jakarta' };
+                    this.currentTime = now.toLocaleTimeString('id-ID', options);
+                    this.currentDate = now.toLocaleDateString('id-ID', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric',
+                        timeZone: 'Asia/Jakarta' 
+                    });
+                },
+                
+                showLogin(type) {
+                    this.loginType = type;
+                    this.showLoginModal = true;
+                    this.loginForm = { username: '', password: '' };
+                },
+                
+                closeLoginModal() {
+                    this.showLoginModal = false;
+                },
+                
+                // Perbaikan di dalam login()
+                async login() {
+                this.isLoading = true;
+                const { username, password } = this.loginForm;
+
+                try {
+                    if (this.loginType === 'admin') {
+                        if (username === 'admin' && password === 'admin123') {
+                            this.currentUser = { id: 'admin', name: 'Administrator', role: 'admin' };
+                            this.currentPage = 'admin';
+                            this.closeLoginModal();
+                            this.$nextTick(() => this.initChart());
+                        } else {
+                            alert('Username atau password admin salah!');
+                        }
+                    } else {
+                        // Ganti 'supabase' menjadi 'supabaseClient'
+                        const { data, error } = await supabaseClient
+                            .from('employees')
+                            .select('*')
+                            .eq('username', username)
+                            .eq('password', password)
+                            .eq('status', 'active')
+                            .single();
+
+                        if (error) {
+                            alert('Username atau password salah, atau akun tidak aktif!');
+                        } else {
+                            this.currentUser = { ...data, role: 'employee' };
+                            this.currentPage = 'employee';
+                            this.updateAttendanceData();
+                            this.closeLoginModal();
+                        }
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    alert('Terjadi kesalahan saat login.');
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+                
+                logout() {
+                    this.currentUser = null;
+                    this.currentPage = 'login';
+                    this.todayAttendance = null;
+                    if (this.chartInstance) {
+                        this.chartInstance.destroy();
+                        this.chartInstance = null;
+                    }
+                },
+                
+                updateAttendanceData() {
+                    if (!this.currentUser || this.currentUser.role !== 'employee') return;
+                    
+                    const today = new Date().toDateString();
+                    this.todayAttendance = this.attendanceRecords.find(record => 
+                        record.employeeId === this.currentUser.id && 
+                        new Date(record.date).toDateString() === today
+                    );
+                    
+                    // Calculate monthly stats
+                    const thisMonth = new Date();
+                    const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+                    const monthEnd = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0);
+                    
+                    const monthlyRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return record.employeeId === this.currentUser.id &&
+                               recordDate >= monthStart && recordDate <= monthEnd;
+                    });
+                    
+                    this.monthlyStats = {
+                        present: monthlyRecords.filter(r => r.status === 'present' || r.status === 'wfe').length, // UBAH: Tambahkan wfe ke perhitungan Hadir
+                        late: monthlyRecords.filter(r => r.status === 'late').length,
+                        sick: monthlyRecords.filter(r => r.status === 'sick').length,
+                        leave: monthlyRecords.filter(r => r.status === 'leave').length // UBAH: Hapus wfe dari perhitungan Izin
+                    };
+                    
+                    // Get recent history (last 30 days, excluding weekends)
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    
+                    this.attendanceHistory = this.attendanceRecords
+                        .filter(record => {
+                            const recordDate = new Date(record.date);
+                            const dayOfWeek = recordDate.getDay();
+                            return record.employeeId === this.currentUser.id &&
+                                   recordDate >= thirtyDaysAgo &&
+                                   dayOfWeek !== 0 && dayOfWeek !== 6; // Exclude weekends
+                        })
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 20);
+                },
+                
+                updateReports() {
+                    // Update monthly report stats based on filter
+                    const [year, month] = this.reportFilter.month.split('-').map(Number);
+                    const monthStart = new Date(year, month - 1, 1);
+                    const monthEnd = new Date(year, month, 0);
+                    
+                    let filteredRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return recordDate >= monthStart && recordDate <= monthEnd;
+                    });
+                    
+                    // Apply division filter
+              //      if (this.reportFilter.division) {
+           //             filteredRecords = filteredRecords.filter(record => {
+            //                const employee = this.employees.find(emp => emp.id === record.employeeId);
+             //               return employee && employee.division === this.reportFilter.division;
+             //           });
+              //      }
+                    
+                    this.monthlyReportStats = {
+                        present: filteredRecords.filter(r => r.status === 'present').length,
+                        late: filteredRecords.filter(r => r.status === 'late').length,
+                        sick: filteredRecords.filter(r => r.status === 'sick').length,
+                        leave: filteredRecords.filter(r => r.status === 'leave').length,
+                        wfe: filteredRecords.filter(r => r.status === 'wfe').length
+                    };
+                    
+                    // Update chart
+                    this.updateChart();
+                },
+                
+                updateChart() {
+                    if (!this.chartInstance) return;
+                    
+                    this.chartInstance.data.datasets[0].data = [
+                        this.monthlyReportStats.present,
+                        this.monthlyReportStats.late,
+                        this.monthlyReportStats.sick,
+                        this.monthlyReportStats.leave,
+                        this.monthlyReportStats.wfe
+                    ];
+                    this.chartInstance.update();
+                },
+                
+                showAttendanceForm(type) {
+                    this.attendanceForm = { type, reason: '' };
+                    this.showAttendanceModal = true;
+                },
+                
+                closeAttendanceModal() {
+                    this.showAttendanceModal = false;
+                },
+                
+                async markAttendance(status) {
+                    this.isLoading = true;
+                    const now = new Date();
+                    const options = { timeZone: 'Asia/Jakarta' };
+                    
+                    const year = now.toLocaleString('en-US', { year: 'numeric', timeZone: 'Asia/Jakarta' });
+                    const month = now.toLocaleString('en-US', { month: '2-digit', timeZone: 'Asia/Jakarta' });
+                    const day = now.toLocaleString('en-US', { day: '2-digit', timeZone: 'Asia/Jakarta' });
+                    const jakartaDate = `${year}-${month}-${day}`;
+
+                    const attendance = {
+                        employeeId: this.currentUser.id,
+                        date: jakartaDate,
+                        time: now.toLocaleTimeString('id-ID', options),
+                        status: status,
+                        reason: ''
+                    };
+
+                    try {
+                        // ✅ GANTI: supabase → supabaseClient
+                        const { data, error } = await supabaseClient
+                            .from('attendance_records')
+                            .insert([attendance])
+                            .select();
+
+                        if (error) throw error;
+
+                        this.attendanceRecords.push(data[0]);
+                        this.updateAttendanceData();
+                        alert('Absensi berhasil dicatat!');
+                    } catch (err) {
+                        console.error('Error submitting attendance:', err);
+                        alert('Gagal mencatat absensi!');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+async submitAttendanceForm() {
+    this.isLoading = true;
+    const now = new Date();
+    const options = { timeZone: 'Asia/Jakarta' };
+    const jakartaDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    
+    const newAttendance = {
+        employeeId: this.currentUser.id,
+        date: jakartaDate,
+        time: now.toLocaleTimeString('id-ID', options),
+        status: this.attendanceForm.type,
+        reason: this.attendanceForm.reason
     };
 
-
-        // Initialize Firebase
-        // Initialize Firebase
-        let app, db, auth;
-        try {
-            app = firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-            auth = firebase.auth();
-            
-            // Enable offline persistence
-            db.enablePersistence().catch((err) => {
-                console.log('Firebase persistence error:', err);
-            });
-            
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.error('Firebase initialization failed:', error);
-            alert('Gagal menghubungkan ke server. Silakan refresh halaman.');
-        }
-
-        // Firebase Store Class
-        class FirebaseStore {
-            constructor() {
-                this.isOnline = navigator.onLine;
-                this.setupNetworkListener();
-                this.updateConnectionStatus();
-            }
-
-            setupNetworkListener() {
-                window.addEventListener('online', () => {
-                    this.isOnline = true;
-                    this.updateConnectionStatus();
-                });
-                
-                window.addEventListener('offline', () => {
-                    this.isOnline = false;
-                    this.updateConnectionStatus();
-                });
-            }
-
-            updateConnectionStatus() {
-                const statusEl = document.getElementById('connection-status');
-                if (this.isOnline) {
-                    statusEl.className = 'connection-status connected';
-                    statusEl.textContent = '🟢 Terhubung ke Firebase';
-                } else {
-                    statusEl.className = 'connection-status disconnected';
-                    statusEl.textContent = '🔴 Offline - Data tersimpan lokal';
-                }
-            }
-
-            // User Operations
-            async addUser(user) {
-                try {
-                    const docRef = await db.collection('users').add({
-                        ...user,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    return { ...user, id: docRef.id };
-                } catch (error) {
-                    console.error('Error adding user:', error);
-                    throw error;
-                }
-            }
-
-            async getUsers() {
-                try {
-                    const snapshot = await db.collection('users').get();
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                } catch (error) {
-                    console.error('Error getting users:', error);
-                    return [];
-                }
-            }
-
-            async updateUser(userId, userData) {
-                try {
-                    await db.collection('users').doc(userId).update({
-                        ...userData,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } catch (error) {
-                    console.error('Error updating user:', error);
-                    throw error;
-                }
-            }
-
-            async deleteUser(userId) {
-                try {
-                    // Delete user
-                    await db.collection('users').doc(userId).delete();
-                    
-                    // Clean up related data
-                    const attendanceSnapshot = await db.collection('attendance')
-                        .where('userId', '==', userId).get();
-                    const tasksSnapshot = await db.collection('dailyTasks')
-                        .where('userId', '==', userId).get();
-                    const kpiProgressSnapshot = await db.collection('kpiProgress')
-                        .where('userId', '==', userId).get();
-                    
-                    const batch = db.batch();
-                    
-                    attendanceSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    tasksSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    kpiProgressSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    
-                    await batch.commit();
-                } catch (error) {
-                    console.error('Error deleting user:', error);
-                    throw error;
-                }
-            }
-
-            // KPI Operations
-            async addKpi(kpi) {
-                try {
-                    const docRef = await db.collection('kpis').add({
-                        ...kpi,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    return { ...kpi, id: docRef.id };
-                } catch (error) {
-                    console.error('Error adding KPI:', error);
-                    throw error;
-                }
-            }
-
-            async getKpis() {
-                try {
-                    const snapshot = await db.collection('kpis').get();
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                } catch (error) {
-                    console.error('Error getting KPIs:', error);
-                    return [];
-                }
-            }
-
-            async deleteKpi(kpiId) {
-                try {
-                    // Delete KPI
-                    await db.collection('kpis').doc(kpiId).delete();
-                    
-                    // Clean up related progress data
-                    const progressSnapshot = await db.collection('kpiProgress')
-                        .where('kpiId', '==', kpiId).get();
-                    
-                    const batch = db.batch();
-                    progressSnapshot.docs.forEach(doc => batch.delete(doc.ref));
-                    await batch.commit();
-                } catch (error) {
-                    console.error('Error deleting KPI:', error);
-                    throw error;
-                }
-            }
-
-            // Attendance Operations
-            async addAttendance(record) {
-                try {
-                    const docRef = await db.collection('attendance').add({
-                        ...record,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    return { ...record, id: docRef.id };
-                } catch (error) {
-                    console.error('Error adding attendance:', error);
-                    throw error;
-                }
-            }
-
-            async getAttendance() {
-                try {
-                    const snapshot = await db.collection('attendance')
-                        .orderBy('timestamp', 'desc')
-                        .get();
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data(),
-                        timestamp: doc.data().timestamp?.toDate?.() || new Date()
-                    }));
-                } catch (error) {
-                    console.error('Error getting attendance:', error);
-                    return [];
-                }
-            }
-
-            // Daily Tasks Operations
-            async addDailyTask(task) {
-                try {
-                    const docRef = await db.collection('dailyTasks').add({
-                        ...task,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    return { ...task, id: docRef.id };
-                } catch (error) {
-                    console.error('Error adding task:', error);
-                    throw error;
-                }
-            }
-
-            async getDailyTasks() {
-                try {
-                    const snapshot = await db.collection('dailyTasks')
-                        .orderBy('timestamp', 'desc')
-                        .get();
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data(),
-                        timestamp: doc.data().timestamp?.toDate?.() || new Date()
-                    }));
-                } catch (error) {
-                    console.error('Error getting daily tasks:', error);
-                    return [];
-                }
-            }
-
-            async deleteDailyTask(taskId) {
-                try {
-                    await db.collection('dailyTasks').doc(taskId).delete();
-                } catch (error) {
-                    console.error('Error deleting task:', error);
-                    throw error;
-                }
-            }
-
-            // KPI Progress Operations
-            async updateKpiProgress(userId, kpiId, current, month, year) {
-                try {
-                    const progressId = `${userId}_${kpiId}_${month}_${year}`;
-                    await db.collection('kpiProgress').doc(progressId).set({
-                        userId,
-                        kpiId,
-                        current: Number(current),
-                        month,
-                        year,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-                } catch (error) {
-                    console.error('Error updating KPI progress:', error);
-                    throw error;
-                }
-            }
-
-            async getKpiProgress() {
-                try {
-                    const snapshot = await db.collection('kpiProgress').get();
-                    const progress = {};
-                    snapshot.docs.forEach(doc => {
-                        const data = doc.data();
-                        const key = `${data.userId}-${data.kpiId}-${data.month}-${data.year}`;
-                        progress[key] = {
-                            current: data.current,
-                            timestamp: data.updatedAt?.toDate?.() || new Date()
-                        };
-                    });
-                    return progress;
-                } catch (error) {
-                    console.error('Error getting KPI progress:', error);
-                    return {};
-                }
-            }
-
-            // Initialize with demo data if needed
-            async initializeDemoData() {
     try {
-        if (!db) {
-            console.log('Firebase not ready, skipping demo data');
-            return;
-        }
-        
-        const users = await this.getUsers();
-        if (users.length === 0) {
-            console.log('Creating demo users...');
-            
-            // Add demo users
-            await this.addUser({
-                name: 'Admin User',
-                username: 'admin',
-                password: 'admin123',
-                role: 'admin'
-            });
+        // ✅ GANTI: supabase → supabaseClient
+        const { data, error } = await supabaseClient
+            .from('attendance_records')
+            .insert([newAttendance])
+            .select();
 
-            await this.addUser({
-                name: 'Syafiq',
-                username: 'Syafiq',
-                password: '1',
-                role: 'employee'
-            });
+        if (error) throw error;
 
-            console.log('Demo data initialized successfully');
-        } else {
-            console.log('Demo data already exists');
-        }
-    } catch (error) {
-        console.error('Error initializing demo data:', error);
-        // Create fallback users in memory
-        this.fallbackUsers = [
-            { id: 1, name: 'Admin User', username: 'admin', password: 'admin123', role: 'admin' },
-            { id: 2, name: 'Syafiq', username: 'Syafiq', password: '1', role: 'employee' }
-        ];
-    }
-}
-        }
-
-        // Global store instance
-        const store = new FirebaseStore();
-
-        const { createApp, ref, computed, onMounted, reactive, nextTick, watch } = Vue;
-
-        createApp({
-            setup() {
-                // State
-                const currentUser = ref(null);
-                const currentView = ref('dashboard');
-                const loginForm = reactive({ username: '', password: '' });
-                const loginError = ref('');
-                const showModal = ref(false);
-                const leaveRequest = reactive({ type: '', note: '' });
-                const newKpi = reactive({ name: '', target: 0, assignedTo: [], description: '' });
-                const newTask = reactive({ description: '' });
-                const loading = ref(false);
-                
-                // Employee management
-                const newEmployee = reactive({ name: '', username: '', password: '', role: 'employee' });
-                const editingEmployee = ref(null);
-                
-                // Employee details state
-                const selectedEmployeeId = ref('');
-                const selectedMonth = ref(new Date().getMonth());
-                
-                // Reports filter
-                const reportMonth = ref(new Date().getMonth());
-                const reportYear = ref(new Date().getFullYear());
-                
-                // Data stores
-                const allUsers = ref([]);
-                const kpis = ref([]);
-                const attendance = ref([]);
-                const dailyTasks = ref([]);
-                const kpiProgress = ref({});
-                
-                // Month names in Indonesian
-                const monthNames = [
-                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                ];
-
-                // Available years for filter
-                const availableYears = computed(() => {
-                    const currentYear = new Date().getFullYear();
-                    return [currentYear - 1, currentYear, currentYear + 1];
-                });
-
-                // Computed properties
-                const employees = computed(() => {
-                    return allUsers.value.filter(u => u.role === 'employee');
-                });
-
-                const myKpis = computed(() => {
-                    if (!currentUser.value || currentUser.value.role !== 'employee') return [];
-                    
-                    const currentMonth = new Date().getMonth();
-                    const currentYear = new Date().getFullYear();
-                    
-                    return kpis.value
-                        .filter(kpi => Array.isArray(kpi.assignedTo) && kpi.assignedTo.includes(currentUser.value.id))
-                        .map(kpi => {
-                            const progressKey = `${currentUser.value.id}-${kpi.id}-${currentMonth}-${currentYear}`;
-                            const progress = kpiProgress.value[progressKey];
-                            return {
-                                ...kpi,
-                                current: progress?.current || 0
-                            };
-                        });
-                });
-
-                const todayTasks = computed(() => {
-                    if (!currentUser.value) return [];
-                    const today = new Date().toDateString();
-                    
-                    return dailyTasks.value.filter(task => 
-                        task.userId === currentUser.value.id &&
-                        new Date(task.timestamp).toDateString() === today
-                    ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                });
-
-                const todayAttendance = computed(() => {
-                    if (!currentUser.value) return null;
-                    const today = new Date().toDateString();
-                    
-                    return attendance.value.find(a => 
-                        a.userId === currentUser.value.id && 
-                        new Date(a.timestamp).toDateString() === today
-                    );
-                });
-
-                const presentToday = computed(() => {
-                    const today = new Date().toDateString();
-                    return attendance.value.filter(a => 
-                        new Date(a.timestamp).toDateString() === today && 
-                        a.status === 'present'
-                    ).length;
-                });
-
-                // Filtered reports
-                const filteredAttendanceReport = computed(() => {
-                    return attendance.value.filter(a => {
-                        const attendanceDate = new Date(a.timestamp);
-                        return attendanceDate.getMonth() === reportMonth.value && 
-                               attendanceDate.getFullYear() === reportYear.value;
-                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                });
-
-                const filteredKpiReport = computed(() => {
-                    const report = [];
-                    kpis.value.forEach(kpi => {
-                        if (Array.isArray(kpi.assignedTo)) {
-                            kpi.assignedTo.forEach(userId => {
-                                const progressKey = `${userId}-${kpi.id}-${reportMonth.value}-${reportYear.value}`;
-                                const progress = kpiProgress.value[progressKey];
-                                report.push({
-                                    userId,
-                                    kpiId: kpi.id,
-                                    current: progress?.current || 0,
-                                    target: kpi.target
-                                });
-                            });
-                        }
-                    });
-                    return report;
-                });
-
-                // Employee details computed
-                const selectedEmployeeAttendance = computed(() => {
-                    if (!selectedEmployeeId.value) return [];
-                    const userId = parseInt(selectedEmployeeId.value);
-                    
-                    return attendance.value.filter(a => {
-                        const attendanceDate = new Date(a.timestamp);
-                        return a.userId === userId && 
-                               attendanceDate.getMonth() === selectedMonth.value &&
-                               attendanceDate.getFullYear() === new Date().getFullYear();
-                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                });
-
-                const selectedEmployeeKpis = computed(() => {
-                    if (!selectedEmployeeId.value) return [];
-                    const userId = parseInt(selectedEmployeeId.value);
-                    const currentYear = new Date().getFullYear();
-                    
-                    return kpis.value
-                        .filter(kpi => Array.isArray(kpi.assignedTo) && kpi.assignedTo.includes(userId))
-                        .map(kpi => {
-                            const progressKey = `${userId}-${kpi.id}-${selectedMonth.value}-${currentYear}`;
-                            return {
-                                ...kpi,
-                                current: kpiProgress.value[progressKey]?.current || 0
-                            };
-                        });
-                });
-
-                const selectedEmployeeTasks = computed(() => {
-                    if (!selectedEmployeeId.value) return [];
-                    const userId = parseInt(selectedEmployeeId.value);
-                    
-                    return dailyTasks.value.filter(task => {
-                        const taskDate = new Date(task.timestamp);
-                        return task.userId === userId && 
-                               taskDate.getMonth() === selectedMonth.value &&
-                               taskDate.getFullYear() === new Date().getFullYear();
-                    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                });
-
-                // Data loading methods
-                const loadAllData = async () => {
-                    try {
-                        loading.value = true;
-                        
-                        const [usersData, kpisData, attendanceData, tasksData, progressData] = await Promise.all([
-                            store.getUsers(),
-                            store.getKpis(),
-                            store.getAttendance(),
-                            store.getDailyTasks(),
-                            store.getKpiProgress()
-                        ]);
-
-                        allUsers.value = usersData;
-                        kpis.value = kpisData;
-                        attendance.value = attendanceData;
-                        dailyTasks.value = tasksData;
-                        kpiProgress.value = progressData;
-
-                        console.log('All data loaded successfully');
-                    } catch (error) {
-                        console.error('Error loading data:', error);
-                        alert('Gagal memuat data. Silakan refresh halaman.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                // Authentication methods
-                const login = async () => {
-    try {
-        loading.value = true;
-        loginError.value = '';
-        
-        if (!loginForm.username?.trim() || !loginForm.password?.trim()) {
-            loginError.value = 'Harap masukkan nama pengguna dan kata sandi';
-            return;
-        }
-        
-        // Try to load data from Firebase
-        try {
-            await loadAllData();
-        } catch (error) {
-            console.log('Firebase unavailable, using fallback data');
-            // Use fallback demo users if Firebase fails
-            allUsers.value = [
-                { id: 1, name: 'Admin User', username: 'admin', password: 'admin123', role: 'admin' },
-                { id: 2, name: 'Syafiq', username: 'Syafiq', password: '1', role: 'employee' }
-            ];
-        }
-        
-        const user = allUsers.value.find(u => 
-            u.username === loginForm.username.trim() && 
-            u.password === loginForm.password
-        );
-        
-        if (user) {
-            currentUser.value = user;
-            loginError.value = '';
-            Object.assign(loginForm, { username: '', password: '' });
-            console.log('Login successful:', user.name);
-        } else {
-            loginError.value = 'Nama pengguna atau kata sandi salah';
-        }
-    } catch (error) {
-        loginError.value = 'Login gagal. Silakan coba lagi.';
-        console.error('Login error:', error);
+        this.attendanceRecords.push(data[0]);
+        this.updateAttendanceData();
+        this.closeAttendanceModal();
+        alert('Absensi berhasil dicatat!');
+    } catch (err) {
+        console.error('Error submitting attendance:', err);
+        alert('Gagal mencatat absensi!');
     } finally {
-        loading.value = false;
+        this.isLoading = false;
     }
-};
-
-                const logout = () => {
-                    currentUser.value = null;
-                    currentView.value = 'dashboard';
-                    Object.assign(loginForm, { username: '', password: '' });
-                    loginError.value = '';
-                    
-                    // Clear data
-                    allUsers.value = [];
-                    kpis.value = [];
-                    attendance.value = [];
-                    dailyTasks.value = [];
-                    kpiProgress.value = {};
-                };
-
-                const setView = (view) => {
-                    currentView.value = view;
-                    console.log('Switching to view:', view);
-                    
-                    if (view === 'employee-details') {
-                        nextTick(() => {
-                            if (employees.value.length > 0 && !selectedEmployeeId.value) {
-                                selectedEmployeeId.value = employees.value[0].id.toString();
-                            }
-                        });
+},
+                
+                getAttendanceModalTitle() {
+                    const titles = {
+                        late: 'Form Terlambat',
+                        sick: 'Form Sakit',
+                        leave: 'Form Izin',
+                        wfe: 'Form Work From Home'
+                    };
+                    return titles[this.attendanceForm.type] || 'Form Absensi';
+                },
+                
+                // Admin functions
+                showEmployeeModal(employee = null) {
+                    if (employee) {
+                        this.employeeForm = { ...employee, password: '' };
+                    } else {
+                        this.employeeForm = { id: null, name: '', nip: '', position: '', password: '', status: 'active' };
                     }
-                };
-
-                // Attendance methods
-                const markAttendance = async (status) => {
+                    this.showEmployeeFormModal = true;
+                },
+                
+                closeEmployeeModal() {
+                    this.showEmployeeFormModal = false;
+                },
+                
+                async submitEmployeeForm() {
+                    this.isLoading = true;
                     try {
-                        loading.value = true;
-                        
-                        if (!currentUser.value) {
-                            alert('Error: Pengguna tidak ditemukan');
-                            return;
-                        }
-                        
-                        const record = await store.addAttendance({
-                            userId: currentUser.value.id,
-                            status: status,
-                            note: ''
-                        });
-                        
-                        // Add to local state immediately
-                        attendance.value.unshift({
-                            ...record,
-                            timestamp: new Date()
-                        });
-                        
-                        console.log('Attendance recorded:', status);
-                    } catch (error) {
-                        console.error('Error marking attendance:', error);
-                        alert('Gagal mencatat kehadiran. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
+                        if (this.employeeForm.id) {
+                            // Update data pegawai
+                            // ✅ GANTI: supabase → supabaseClient
+                            const { error } = await supabaseClient
+                                .from('employees')
+                                .update(this.employeeForm)
+                                .eq('id', this.employeeForm.id);
 
-                const showLeaveModal = (type) => {
-                    Object.assign(leaveRequest, { type, note: '' });
-                    showModal.value = true;
-                };
-
-                const closeModal = () => {
-                    showModal.value = false;
-                    Object.assign(leaveRequest, { type: '', note: '' });
-                };
-
-                const submitLeaveRequest = async () => {
-                    try {
-                        loading.value = true;
-                        
-                        if (!leaveRequest.note?.trim()) {
-                            alert('Harap berikan alasan untuk permintaan cuti Anda');
-                            return;
-                        }
-                        
-                        if (!currentUser.value) {
-                            alert('Error: Pengguna tidak ditemukan');
-                            return;
-                        }
-                        
-                        const record = await store.addAttendance({
-                            userId: currentUser.value.id,
-                            status: leaveRequest.type,
-                            note: leaveRequest.note.trim()
-                        });
-                        
-                        // Add to local state immediately
-                        attendance.value.unshift({
-                            ...record,
-                            timestamp: new Date()
-                        });
-                        
-                        closeModal();
-                        console.log('Leave request submitted:', leaveRequest.type);
-                    } catch (error) {
-                        console.error('Error submitting leave request:', error);
-                        alert('Gagal mengirim permintaan cuti. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                // Daily Tasks Methods
-                const addDailyTask = async () => {
-                    try {
-                        loading.value = true;
-                        
-                        if (!newTask.description?.trim()) {
-                            alert('Harap masukkan deskripsi tugas');
-                            return;
-                        }
-                        
-                        if (!currentUser.value) {
-                            alert('Error: Pengguna tidak ditemukan');
-                            return;
-                        }
-
-                        const task = await store.addDailyTask({
-                            userId: currentUser.value.id,
-                            description: newTask.description.trim()
-                        });
-                        
-                        // Add to local state immediately
-                        dailyTasks.value.unshift({
-                            ...task,
-                            timestamp: new Date()
-                        });
-                        
-                        newTask.description = '';
-                        console.log('Task added successfully');
-                    } catch (error) {
-                        console.error('Error adding task:', error);
-                        alert('Gagal menambah tugas. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                const deleteTask = async (taskId) => {
-                    try {
-                        if (!confirm('Apakah Anda yakin ingin menghapus tugas ini?')) return;
-                        
-                        loading.value = true;
-                        await store.deleteDailyTask(taskId);
-                        
-                        // Remove from local state immediately
-                        const index = dailyTasks.value.findIndex(t => t.id === taskId);
-                        if (index > -1) {
-                            dailyTasks.value.splice(index, 1);
-                        }
-                        
-                        console.log('Task deleted:', taskId);
-                    } catch (error) {
-                        console.error('Error deleting task:', error);
-                        alert('Gagal menghapus tugas. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                // Employee Management Methods
-                const editEmployee = (employee) => {
-                    editingEmployee.value = employee;
-                    Object.assign(newEmployee, { ...employee });
-                };
-
-                const cancelEdit = () => {
-                    editingEmployee.value = null;
-                    Object.assign(newEmployee, { name: '', username: '', password: '', role: 'employee' });
-                };
-
-                const saveEmployee = async () => {
-                    try {
-                        loading.value = true;
-                        
-                        if (!newEmployee.name?.trim() || !newEmployee.username?.trim() || !newEmployee.password?.trim()) {
-                            alert('Harap isi semua field');
-                            return;
-                        }
-
-                        // Check for duplicate username
-                        const existingUser = allUsers.value.find(u => 
-                            u.username === newEmployee.username.trim() && 
-                            (!editingEmployee.value || u.id !== editingEmployee.value.id)
-                        );
-                        
-                        if (existingUser) {
-                            alert('Nama pengguna sudah ada');
-                            return;
-                        }
-
-                        if (editingEmployee.value) {
-                            // Update existing employee
-                            await store.updateUser(editingEmployee.value.id, { ...newEmployee });
-                            
-                            // Update local state
-                            const index = allUsers.value.findIndex(u => u.id === editingEmployee.value.id);
-                            if (index > -1) {
-                                Object.assign(allUsers.value[index], newEmployee);
-                            }
-                            
-                            console.log('Employee updated:', newEmployee.name);
+                            if (error) throw error;
                         } else {
-                            // Add new employee
-                            const user = await store.addUser({ ...newEmployee });
-                            allUsers.value.push(user);
-                            console.log('Employee added:', newEmployee.name);
+                            // Tambah pegawai baru
+                            // ✅ GANTI: supabase → supabaseClient
+                            const { error } = await supabaseClient
+                                .from('employees')
+                                .insert({
+                                    name: this.employeeForm.name,
+                                    username: this.employeeForm.username,
+                                    password: this.employeeForm.password,
+                                    position: this.employeeForm.position,
+                                    status: this.employeeForm.status
+                                });
+
+                            if (error) throw error;
                         }
-                        
-                        cancelEdit();
-                    } catch (error) {
-                        console.error('Error saving employee:', error);
-                        alert('Gagal menyimpan karyawan. Silakan coba lagi.');
+                        await this.loadInitialData();
+                        this.closeEmployeeModal();
+                        alert(this.employeeForm.id ? 'Pegawai berhasil diupdate!' : 'Pegawai berhasil ditambahkan!');
+                    } catch (err) {
+                        console.error('Error submitting employee form:', err);
+                        alert('Terjadi kesalahan saat menyimpan data pegawai.');
                     } finally {
-                        loading.value = false;
+                        this.isLoading = false;
                     }
-                };
+                },
+                
+                editEmployee(employee) {
+                    this.showEmployeeModal(employee);
+                },
+                
+                async deleteEmployee(employeeId) {
+                    if (confirm('Yakin ingin menghapus pegawai ini?')) {
+                        this.isLoading = true;
+                        try {
+                            // ✅ GANTI: supabase → supabaseClient
+                            const { error } = await supabaseClient
+                                .from('employees')
+                                .delete()
+                                .eq('id', employeeId);
 
-                const deleteEmployee = async (employeeId) => {
-                    try {
-                        if (!confirm('Apakah Anda yakin ingin menghapus karyawan ini? Semua data terkait akan dihapus.')) return;
-                        
-                        loading.value = true;
-                        await store.deleteUser(employeeId);
-                        
-                        // Remove from local state
-                        const userIndex = allUsers.value.findIndex(u => u.id === employeeId);
-                        if (userIndex > -1) {
-                            allUsers.value.splice(userIndex, 1);
+                            if (error) throw error;
+
+                            await this.loadInitialData();
+                            alert('Pegawai berhasil dihapus!');
+                        } catch (err) {
+                            console.error('Error deleting employee:', err);
+                            alert('Terjadi kesalahan saat menghapus pegawai.');
+                        } finally {
+                            this.isLoading = false;
                         }
-                        
-                        // Clean up related data
-                        attendance.value = attendance.value.filter(a => a.userId !== employeeId);
-                        dailyTasks.value = dailyTasks.value.filter(t => t.userId !== employeeId);
-                        
-                        // Clean up KPI progress
-                        Object.keys(kpiProgress.value).forEach(key => {
-                            if (key.startsWith(`${employeeId}-`)) {
-                                delete kpiProgress.value[key];
-                            }
-                        });
-                        
-                        console.log('Employee deleted:', employeeId);
-                    } catch (error) {
-                        console.error('Error deleting employee:', error);
-                        alert('Gagal menghapus karyawan. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
                     }
-                };
-
-                // KPI Methods
-                const updateKpiProgress = async (kpi, event) => {
+                },
+                
+                editAttendanceRecord(record) {
+                    this.editAttendanceForm = { ...record };
+                    this.showEditAttendanceModal = true;
+                },
+                
+                closeEditAttendanceModal() {
+                    this.showEditAttendanceModal = false;
+                },
+                async submitEditAttendance() {
+                    this.isLoading = true;
                     try {
-                        if (!currentUser.value) {
-                            alert('Error: Pengguna tidak ditemukan');
-                            return;
-                        }
-                        
-                        const newValue = Number(event.target.value) || 0;
-                        const validValue = Math.max(0, Math.min(newValue, kpi.target));
-                        
-                        const currentMonth = new Date().getMonth();
-                        const currentYear = new Date().getFullYear();
-                        
-                        await store.updateKpiProgress(currentUser.value.id, kpi.id, validValue, currentMonth, currentYear);
-                        
-                        // Update local state immediately
-                        const progressKey = `${currentUser.value.id}-${kpi.id}-${currentMonth}-${currentYear}`;
-                        kpiProgress.value[progressKey] = {
-                            current: validValue,
-                            timestamp: new Date()
-                        };
-                        
-                        console.log(`KPI Updated: ${kpi.name} = ${validValue}/${kpi.target}`);
-                    } catch (error) {
-                        console.error('Error updating KPI:', error);
-                        alert('Gagal memperbarui KPI. Silakan coba lagi.');
-                    }
-                };
+                        // ✅ GANTI: supabase → supabaseClient
+                        const { error } = await supabaseClient
+                            .from('attendance_records')
+                            .update(this.editAttendanceForm)
+                            .eq('id', this.editAttendanceForm.id);
 
-                const addKpi = async () => {
-                    try {
-                        loading.value = true;
-                        
-                        if (!newKpi.name?.trim() || newKpi.target <= 0 || !Array.isArray(newKpi.assignedTo) || newKpi.assignedTo.length === 0) {
-                            alert('Harap isi semua field dengan benar dan tugaskan kepada minimal satu karyawan');
-                            return;
-                        }
-                        
-                        const kpi = await store.addKpi({ 
-                            ...newKpi,
-                            name: newKpi.name.trim(),
-                            description: newKpi.description?.trim() || '',
-                            assignedTo: [...newKpi.assignedTo]
-                        });
-                        
-                        kpis.value.push(kpi);
-                        Object.assign(newKpi, { name: '', target: 0, assignedTo: [], description: '' });
-                        console.log('KPI added successfully');
-                    } catch (error) {
-                        console.error('Error adding KPI:', error);
-                        alert('Gagal menambah KPI. Silakan coba lagi.');
+                        if (error) throw error;
+
+                        await this.loadInitialData();
+                        this.closeEditAttendanceModal();
+                        alert('Absensi berhasil diupdate!');
+                    } catch (err) {
+                        console.error('Error updating attendance record:', err);
+                        alert('Terjadi kesalahan saat mengupdate absensi.');
                     } finally {
-                        loading.value = false;
+                        this.isLoading = false;
                     }
-                };
-
-                const deleteKpi = async (kpiId) => {
-                    try {
-                        if (!confirm('Apakah Anda yakin ingin menghapus KPI ini? Semua data progres akan dihapus.')) return;
-                        
-                        loading.value = true;
-                        await store.deleteKpi(kpiId);
-                        
-                        // Remove from local state
-                        const index = kpis.value.findIndex(k => k.id === kpiId);
-                        if (index > -1) {
-                            kpis.value.splice(index, 1);
-                        }
-                        
-                        // Clean up progress data
-                        Object.keys(kpiProgress.value).forEach(key => {
-                            if (key.includes(`-${kpiId}-`)) {
-                                delete kpiProgress.value[key];
-                            }
-                        });
-                        
-                        console.log('KPI deleted:', kpiId);
-                    } catch (error) {
-                        console.error('Error deleting KPI:', error);
-                        alert('Gagal menghapus KPI. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
+                },
+                                
+                exportMonthlyReport() {
+                    // Export CSV for selected month and division
+                    const [year, month] = this.reportFilter.month.split('-').map(Number);
+                    const monthStart = new Date(year, month - 1, 1);
+                    const monthEnd = new Date(year, month, 0);
+                    
+                    let filteredRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return recordDate >= monthStart && recordDate <= monthEnd;
+                    });
+                    
+                    
+                    const headers = ['Nama', 'Tanggal', 'Waktu', 'Status', 'Keterangan'];
+                    const rows = filteredRecords.map(record => {
+                        const employee = this.employees.find(emp => emp.id === record.employeeId);
+                        return [
+                            employee ? employee.name : 'Unknown',
+                            this.formatDate(record.date),
+                            record.time,
+                            this.getStatusText(record.status),
+                            record.reason || record.adminNote || ''
+                        ];
+                    });
+                    
+                    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const monthName = new Date(year, month - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                    a.download = `laporan_absensi_${monthName.replace(' ', '_')}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                },
+                
+                getSelectedMonthText() {
+                    if (!this.reportFilter.month) return 'Bulan Ini';
+                    const [year, month] = this.reportFilter.month.split('-').map(Number);
+                    return new Date(year, month - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                },
+                
+                getFilteredEmployees() {
+                    return this.employees;
+                },
+                
+                getMonthlyEmployeeStats(employeeId) {
+                    const [year, month] = this.reportFilter.month.split('-').map(Number);
+                    const monthStart = new Date(year, month - 1, 1);
+                    const monthEnd = new Date(year, month, 0);
+                    
+                    const monthlyRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return record.employeeId === employeeId &&
+                               recordDate >= monthStart && recordDate <= monthEnd;
+                    });
+                    
+                    return {
+                        present: monthlyRecords.filter(r => r.status === 'present').length,
+                        late: monthlyRecords.filter(r => r.status === 'late').length,
+                        sick: monthlyRecords.filter(r => r.status === 'sick').length,
+                        leave: monthlyRecords.filter(r => r.status === 'leave').length,
+                        wfe: monthlyRecords.filter(r => r.status === 'wfe').length
+                    };
+                },
+                
+                getMonthlyAttendanceRate(employeeId) {
+                    const [year, month] = this.reportFilter.month.split('-').map(Number);
+                    const monthStart = new Date(year, month - 1, 1);
+                    const monthEnd = new Date(year, month, 0);
+                    
+                    // Count working days (exclude weekends)
+                    let workingDays = 0;
+                    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+                        if (d.getDay() !== 0 && d.getDay() !== 6) workingDays++;
                     }
-                };
-
-                // Reports Methods
-                const refreshReports = async () => {
-                    try {
-                        loading.value = true;
-                        console.log(`Refreshing reports for ${monthNames[reportMonth.value]} ${reportYear.value}`);
-                        await loadAllData();
-                    } catch (error) {
-                        console.error('Error refreshing reports:', error);
-                        alert('Gagal menyegarkan laporan. Silakan coba lagi.');
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                const refreshEmployeeDetails = async () => {
-                    try {
-                        loading.value = true;
-                        console.log('Refreshing employee details...');
-                        await loadAllData();
-                    } catch (error) {
-                        console.error('Error refreshing employee details:', error);
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
+                    
+                    const presentRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return record.employeeId === employeeId &&
+                               recordDate >= monthStart && recordDate <= monthEnd &&
+                               ['present', 'late', 'wfe'].includes(record.status);
+                    }).length;
+                    
+                    return workingDays > 0 ? Math.round((presentRecords / workingDays) * 100) : 0;
+                },
+                
                 // Utility functions
-                const formatDate = (date) => {
-                    try {
-                        return date.toLocaleDateString('id-ID', { 
-                            weekday: 'short', 
-                            year: 'numeric', 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
-                    } catch (error) {
-                        console.error('Error formatting date:', error);
-                        return 'Format tanggal error';
+                getStatusText(status) {
+                    const statusTexts = {
+                        present: 'Hadir',
+                        late: 'Terlambat',
+                        sick: 'Sakit',
+                        leave: 'Izin',
+                        wfe: 'wfe',
+                        absent: 'Tidak Hadir'
+                    };
+                    return statusTexts[status] || status;
+                },
+                
+                getStatusClass(status) {
+                    const statusClasses = {
+                        present: 'bg-emerald-100 text-emerald-800',
+                        late: 'bg-amber-100 text-amber-800',
+                        sick: 'bg-red-100 text-red-800',
+                        leave: 'bg-slate-100 text-slate-800',
+                        wfe: 'bg-blue-100 text-blue-800',
+                        absent: 'bg-red-100 text-red-800'
+                    };
+                    return statusClasses[status] || 'bg-slate-100 text-slate-800';
+                },
+                
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString('id-ID', {
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                },
+                
+                getEmployeeName(employeeId) {
+                    const employee = this.employees.find(emp => emp.id === employeeId);
+                    return employee ? employee.name : 'Unknown';
+                },
+                
+                getTodayStatusText(employeeId) {
+                    const today = new Date().toDateString();
+                    const record = this.attendanceRecords.find(record => 
+                        record.employeeId === employeeId && 
+                        new Date(record.date).toDateString() === today
+                    );
+                    return record ? this.getStatusText(record.status) : 'Belum Absen';
+                },
+                
+                getTodayStatusClass(employeeId) {
+                    const today = new Date().toDateString();
+                    const record = this.attendanceRecords.find(record => 
+                        record.employeeId === employeeId && 
+                        new Date(record.date).toDateString() === today
+                    );
+                    return record ? this.getStatusClass(record.status) : 'bg-slate-100 text-slate-800';
+                },
+                
+                getAttendanceRate(employeeId) {
+                    const thisMonth = new Date();
+                    const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
+                    const monthEnd = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0);
+                    
+                    // Count working days (exclude weekends)
+                    let workingDays = 0;
+                    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+                        if (d.getDay() !== 0 && d.getDay() !== 6) workingDays++;
                     }
-                };
-
-                const formatTime = (timestamp) => {
-                    try {
-                        return new Date(timestamp).toLocaleTimeString('id-ID', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                    } catch (error) {
-                        console.error('Error formatting time:', error);
-                        return 'Format waktu error';
-                    }
-                };
-
-                const getUserName = (userId) => {
-                    try {
-                        const user = allUsers.value.find(u => u.id === userId);
-                        return user ? user.name : 'Pengguna Tidak Dikenal';
-                    } catch (error) {
-                        console.error('Error getting user name:', error);
-                        return 'Error Nama Pengguna';
-                    }
-                };
-
-                const getKpiName = (kpiId) => {
-                    try {
-                        const kpi = kpis.value.find(k => k.id === kpiId);
-                        return kpi ? kpi.name : 'KPI Tidak Dikenal';
-                    } catch (error) {
-                        console.error('Error getting KPI name:', error);
-                        return 'Error Nama KPI';
-                    }
-                };
-
-                const getAssignedNames = (userIds) => {
-                    try {
-                        if (!Array.isArray(userIds)) return 'Data tidak valid';
-                        return userIds.map(id => getUserName(id)).join(', ');
-                    } catch (error) {
-                        console.error('Error getting assigned names:', error);
-                        return 'Error Nama Penugasan';
-                    }
-                };
-
-                const getAttendanceStatus = (userId) => {
-                    try {
-                        const today = new Date().toDateString();
-                        const record = attendance.value.find(a => 
-                            a.userId === userId && 
-                            new Date(a.timestamp).toDateString() === today
-                        );
-                        
-                        if (!record) return 'status-absent';
-                        
-                        switch(record.status) {
-                            case 'present': return 'status-present';
-                            case 'sick': return 'status-sick';
-                            case 'personal': return 'status-leave';
-                            case 'field-work': return 'status-field-work';
-                            default: return 'status-absent';
-                        }
-                    } catch (error) {
-                        console.error('Error getting attendance status:', error);
-                        return 'status-absent';
-                    }
-                };
-
-                const getAttendanceStatusText = (userId) => {
-                    try {
-                        const today = new Date().toDateString();
-                        const record = attendance.value.find(a => 
-                            a.userId === userId && 
-                            new Date(a.timestamp).toDateString() === today
-                        );
-                        
-                        if (!record) return 'Belum Dicatat';
-                        return getStatusText(record.status);
-                    } catch (error) {
-                        console.error('Error getting attendance status text:', error);
-                        return 'Error Status';
-                    }
-                };
-
-                const getStatusClass = (status) => {
-                    try {
-                        switch(status) {
-                            case 'present': return 'status-present';
-                            case 'sick': return 'status-sick';
-                            case 'personal': return 'status-leave';
-                            case 'field-work': return 'status-field-work';
-                            default: return 'status-absent';
-                        }
-                    } catch (error) {
-                        console.error('Error getting status class:', error);
-                        return 'status-absent';
-                    }
-                };
-
-                const getStatusText = (status) => {
-                    try {
-                        switch(status) {
-                            case 'present': return 'Hadir';
-                            case 'sick': return 'Cuti Sakit';
-                            case 'personal': return 'Cuti Pribadi';
-                            case 'field-work': return 'Kerja Lapangan';
-                            default: return 'Belum Dicatat';
-                        }
-                    } catch (error) {
-                        console.error('Error getting status text:', error);
-                        return 'Error Status';
-                    }
-                };
-
-                const getLeaveTitle = () => {
-                    try {
-                        switch(leaveRequest.type) {
-                            case 'sick': return 'Permintaan Cuti Sakit';
-                            case 'personal': return 'Permintaan Cuti Pribadi';
-                            case 'field-work': return 'Permintaan Kerja Lapangan';
-                            default: return 'Permintaan Cuti';
-                        }
-                    } catch (error) {
-                        console.error('Error getting leave title:', error);
-                        return 'Permintaan Cuti';
-                    }
-                };
-
-                const getSelectedEmployeeName = () => {
-                    try {
-                        if (!selectedEmployeeId.value) return '';
-                        const emp = employees.value.find(e => e.id === parseInt(selectedEmployeeId.value));
-                        return emp ? emp.name : 'Karyawan Tidak Dikenal';
-                    } catch (error) {
-                        console.error('Error getting selected employee name:', error);
-                        return 'Error Nama Karyawan';
-                    }
-                };
-
-                // Initialize app
-                // Initialize app
-onMounted(async () => {
-    try {
-        loading.value = true;
-        console.log('HRIS App initializing...');
-        
-        // Check Firebase connection
-        if (db) {
-            try {
-                // Initialize demo data if needed
-                await store.initializeDemoData();
-            } catch (error) {
-                console.log('Demo data initialization failed, app will work with fallback data');
+                    
+                    const presentRecords = this.attendanceRecords.filter(record => {
+                        const recordDate = new Date(record.date);
+                        return record.employeeId === employeeId &&
+                               recordDate >= monthStart && recordDate <= monthEnd &&
+                               ['present', 'late', 'wfe'].includes(record.status);
+                    }).length;
+                    
+                    return workingDays > 0 ? Math.round((presentRecords / workingDays) * 100) : 0;
+                },
+                
+                get todayPresentCount() {
+                    const today = new Date().toDateString();
+                    return this.attendanceRecords.filter(record => 
+                        new Date(record.date).toDateString() === today &&
+                        ['present', 'late', 'wfe'].includes(record.status)
+                    ).length;
+                },
+                
+                get allAttendanceRecords() {
+                    return this.attendanceRecords
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 50); // Show last 50 records
+                },
+                
+                updateAllAttendanceRecords() {
+                    // Trigger reactivity
+                    this.attendanceRecords = [...this.attendanceRecords];
+                },
+              
+                // menyimpan di localstorage  
+          //      saveEmployees() {
+           //         localStorage.setItem('employees', JSON.stringify(this.employees));
+             //   },
+                
+             //   saveAttendanceRecords() {
+             //       localStorage.setItem('attendanceRecords', JSON.stringify(this.attendanceRecords));
+              //  },
+                
+                initChart() {
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const ctx = document.getElementById('attendanceChart');
+                            if (ctx && !this.chartInstance) {
+                                this.chartInstance = new Chart(ctx, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'wfe'],
+                                        datasets: [{
+                                            label: 'Jumlah',
+                                            data: [
+                                                this.monthlyReportStats.present,
+                                                this.monthlyReportStats.late,
+                                                this.monthlyReportStats.sick,
+                                                this.monthlyReportStats.leave,
+                                                this.monthlyReportStats.wfe
+                                            ],
+                                            backgroundColor: [
+                                                '#059669', // emerald-600
+                                                '#d97706', // amber-600
+                                                '#dc2626', // red-600
+                                                '#64748b', // slate-500
+                                                '#2563eb'  // blue-600
+                                            ],
+                                            borderWidth: 0,
+                                            borderRadius: 8
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            y: {
+                                                beginAtZero: true,
+                                                grid: {
+                                                    color: '#f1f5f9'
+                                                },
+                                                ticks: {
+                                                    color: '#64748b',
+                                                    stepSize: 1
+                                                }
+                                            },
+                                            x: {
+                                                grid: {
+                                                    display: false
+                                                },
+                                                ticks: {
+                                                    color: '#64748b'
+                                                }
+                                            }
+                                        },
+                                        layout: {
+                                            padding: {
+                                                top: 20,
+                                                bottom: 20
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }, 100);
+                    });
+                }
             }
-        } else {
-            console.log('Firebase not available, using offline mode');
+        }
+    </script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+        
+        /* Custom scrollbar for better UX */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
         }
         
-        console.log('App initialization complete');
-    } catch (error) {
-        console.error('Error during app initialization:', error);
-        console.log('App will work in fallback mode');
-    } finally {
-        loading.value = false;
-    }
-});
-                return {
-                    // State
-                    currentUser,
-                    currentView,
-                    loginForm,
-                    loginError,
-                    showModal,
-                    leaveRequest,
-                    newKpi,
-                    newTask,
-                    newEmployee,
-                    editingEmployee,
-                    selectedEmployeeId,
-                    selectedMonth,
-                    reportMonth,
-                    reportYear,
-                    loading,
-                    monthNames,
-                    availableYears,
-                    
-                    // Data
-                    allUsers,
-                    employees,
-                    kpis,
-                    myKpis,
-                    todayTasks,
-                    todayAttendance,
-                    presentToday,
-                    filteredAttendanceReport,
-                    filteredKpiReport,
-                    selectedEmployeeAttendance,
-                    selectedEmployeeKpis,
-                    selectedEmployeeTasks,
-                    
-                    // Methods
-                    login,
-                    logout,
-                    setView,
-                    markAttendance,
-                    showLeaveModal,
-                    closeModal,
-                    submitLeaveRequest,
-                    addDailyTask,
-                    deleteTask,
-                    editEmployee,
-                    cancelEdit,
-                    saveEmployee,
-                    deleteEmployee,
-                    updateKpiProgress,
-                    addKpi,
-                    deleteKpi,
-                    refreshReports,
-                    refreshEmployeeDetails,
-                    formatDate,
-                    formatTime,
-                    getUserName,
-                    getKpiName,
-                    getAssignedNames,
-                    getAttendanceStatus,
-                    getAttendanceStatusText,
-                    getStatusClass,
-                    getStatusText,
-                    getLeaveTitle,
-                    getSelectedEmployeeName
-                };
+        /* Touch targets for mobile */
+        @media (max-width: 768px) {
+            button, .btn {
+                min-height: 44px;
+                min-width: 44px;
             }
-        }).mount('#app');
-    </script>
+        }
+        
+        /* Performance optimizations */
+        * {
+            box-sizing: border-box;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Smooth focus states */
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Mobile-first responsive design */
+        .mobile-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 640px) {
+            .mobile-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .mobile-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* Accessibility improvements */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .bg-slate-50 { background-color: #ffffff; }
+            .border-slate-200 { border-color: #000000; }
+            .text-slate-600 { color: #000000; }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .bg-white {
+                box-shadow: none !important;
+            }
+        }
+        
+        /* Dark mode preparation (can be activated later) */
+        @media (prefers-color-scheme: dark) {
+            .dark-mode {
+                background-color: #1e293b;
+                color: #f1f5f9;
+            }
+            
+            .dark-mode .bg-white {
+                background-color: #334155;
+            }
+            
+            .dark-mode .text-slate-900 {
+                color: #f1f5f9;
+            }
+        }
+    </style>
 </body>
 </html>
