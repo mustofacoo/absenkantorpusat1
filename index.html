@@ -622,34 +622,43 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey
                     this.updateAllAttendanceRecords();
                 },
                 
-            async loadInitialData() {
-            this.isLoading = true;
-                try {
-                    // Ganti 'supabase' menjadi 'supabaseClient'
-                    const { data: employeesData, error: employeesError } = await supabaseClient
-                        .from('employees')
-                        .select('*');
+                async loadInitialData() {
+                    this.isLoading = true;
+                    try {
+                        const { data: employeesData, error: employeesError } = await supabaseClient
+                            .from('employees')
+                            .select('*');
 
-                    if (employeesError) throw employeesError;
-                    this.employees = employeesData;
+                        if (employeesError) throw employeesError;
+                        this.employees = employeesData;
 
-                    const { data: attendanceData, error: attendanceError } = await supabaseClient
-                        .from('attendance_records')
-                        .select('*');
+                        const { data: attendanceData, error: attendanceError } = await supabaseClient
+                            .from('attendance_records')
+                            .select('*');
 
-                    if (attendanceError) throw attendanceError;
-                    this.attendanceRecords = attendanceData;
+                        if (attendanceError) throw attendanceError;
 
-                    if (this.currentUser) {
-                        this.updateAttendanceData();
+                        // ✅ FIXED: Konversi dari snake_case ke camelCase
+                        this.attendanceRecords = attendanceData.map(record => ({
+                            id: record.id,
+                            employeeId: record.employee_id,  // Konversi ke camelCase
+                            date: record.date,
+                            time: record.time,
+                            status: record.status,
+                            reason: record.reason || '',
+                            adminNote: record.admin_note || ''
+                        }));
+
+                        if (this.currentUser) {
+                            this.updateAttendanceData();
+                        }
+                    } catch (error) {
+                        console.error('Error fetching data from Supabase:', error);
+                        alert('Gagal memuat data dari database. Silakan coba lagi.');
+                    } finally {
+                        this.isLoading = false;
                     }
-                } catch (error) {
-                    console.error('Error fetching data from Supabase:', error);
-                    alert('Gagal memuat data dari database. Silakan coba lagi.');
-                } finally {
-                    this.isLoading = false;
-                }
-            },
+                },
 
                 
                 generateDemoAttendanceData() {
@@ -860,77 +869,97 @@ const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey
                 },
                 
                 async markAttendance(status) {
-                    this.isLoading = true;
-                    const now = new Date();
-                    const options = { timeZone: 'Asia/Jakarta' };
-                    
-                    const year = now.toLocaleString('en-US', { year: 'numeric', timeZone: 'Asia/Jakarta' });
-                    const month = now.toLocaleString('en-US', { month: '2-digit', timeZone: 'Asia/Jakarta' });
-                    const day = now.toLocaleString('en-US', { day: '2-digit', timeZone: 'Asia/Jakarta' });
-                    const jakartaDate = `${year}-${month}-${day}`;
+                this.isLoading = true;
+                const now = new Date();
+                const options = { timeZone: 'Asia/Jakarta' };
+                
+                const year = now.toLocaleString('en-US', { year: 'numeric', timeZone: 'Asia/Jakarta' });
+                const month = now.toLocaleString('en-US', { month: '2-digit', timeZone: 'Asia/Jakarta' });
+                const day = now.toLocaleString('en-US', { day: '2-digit', timeZone: 'Asia/Jakarta' });
+                const jakartaDate = `${year}-${month}-${day}`;
 
-                    const attendance = {
-                        employeeId: this.currentUser.id,
-                        date: jakartaDate,
-                        time: now.toLocaleTimeString('id-ID', options),
-                        status: status,
-                        reason: ''
+                const attendance = {
+                    employee_id: this.currentUser.id,  // ✅ FIXED: employee_id bukan employeeId
+                    date: jakartaDate,
+                    time: now.toLocaleTimeString('id-ID', options),
+                    status: status,
+                    reason: ''
+                };
+
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('attendance_records')
+                        .insert([attendance])
+                        .select();
+
+                    if (error) throw error;
+
+                    // Konversi kembali ke camelCase untuk JavaScript
+                    const savedRecord = {
+                        id: data[0].id,
+                        employeeId: data[0].employee_id,
+                        date: data[0].date,
+                        time: data[0].time,
+                        status: data[0].status,
+                        reason: data[0].reason || ''
                     };
+                    
+                    this.attendanceRecords.push(savedRecord);
+                    this.updateAttendanceData();
+                    alert('Absensi berhasil dicatat!');
+                } catch (err) {
+                    console.error('Error submitting attendance:', err);
+                    alert(`Gagal mencatat absensi: ${err.message}`);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
 
-                    try {
-                        // ✅ GANTI: supabase → supabaseClient
-                        const { data, error } = await supabaseClient
-                            .from('attendance_records')
-                            .insert([attendance])
-                            .select();
 
-                        if (error) throw error;
+            async submitAttendanceForm() {
+                this.isLoading = true;
+                const now = new Date();
+                const options = { timeZone: 'Asia/Jakarta' };
+                const jakartaDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                
+                const newAttendance = {
+                    employee_id: this.currentUser.id,  // ✅ FIXED: employee_id bukan employeeId
+                    date: jakartaDate,
+                    time: now.toLocaleTimeString('id-ID', options),
+                    status: this.attendanceForm.type,
+                    reason: this.attendanceForm.reason
+                };
 
-                        this.attendanceRecords.push(data[0]);
-                        this.updateAttendanceData();
-                        alert('Absensi berhasil dicatat!');
-                    } catch (err) {
-                        console.error('Error submitting attendance:', err);
-                        alert('Gagal mencatat absensi!');
-                    } finally {
-                        this.isLoading = false;
-                    }
-                },
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('attendance_records')
+                        .insert([newAttendance])
+                        .select();
 
-async submitAttendanceForm() {
-    this.isLoading = true;
-    const now = new Date();
-    const options = { timeZone: 'Asia/Jakarta' };
-    const jakartaDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    
-    const newAttendance = {
-        employeeId: this.currentUser.id,
-        date: jakartaDate,
-        time: now.toLocaleTimeString('id-ID', options),
-        status: this.attendanceForm.type,
-        reason: this.attendanceForm.reason
-    };
+                    if (error) throw error;
 
-    try {
-        // ✅ GANTI: supabase → supabaseClient
-        const { data, error } = await supabaseClient
-            .from('attendance_records')
-            .insert([newAttendance])
-            .select();
+                    // Konversi kembali ke camelCase untuk JavaScript
+                    const savedRecord = {
+                        id: data[0].id,
+                        employeeId: data[0].employee_id,
+                        date: data[0].date,
+                        time: data[0].time,
+                        status: data[0].status,
+                        reason: data[0].reason || ''
+                    };
+                    
+                    this.attendanceRecords.push(savedRecord);
+                    this.updateAttendanceData();
+                    this.closeAttendanceModal();
+                    alert('Absensi berhasil dicatat!');
+                } catch (err) {
+                    console.error('Error submitting attendance:', err);
+                    alert(`Gagal mencatat absensi: ${err.message}`);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
 
-        if (error) throw error;
-
-        this.attendanceRecords.push(data[0]);
-        this.updateAttendanceData();
-        this.closeAttendanceModal();
-        alert('Absensi berhasil dicatat!');
-    } catch (err) {
-        console.error('Error submitting attendance:', err);
-        alert('Gagal mencatat absensi!');
-    } finally {
-        this.isLoading = false;
-    }
-},
                 
                 getAttendanceModalTitle() {
                     const titles = {
@@ -1032,10 +1061,17 @@ async submitAttendanceForm() {
                 async submitEditAttendance() {
                     this.isLoading = true;
                     try {
-                        // ✅ GANTI: supabase → supabaseClient
+                        // ✅ FIXED: Konversi camelCase ke snake_case untuk database
+                        const updateData = {
+                            employee_id: this.editAttendanceForm.employeeId,
+                            date: this.editAttendanceForm.date,
+                            status: this.editAttendanceForm.status,
+                            admin_note: this.editAttendanceForm.adminNote
+                        };
+                        
                         const { error } = await supabaseClient
                             .from('attendance_records')
-                            .update(this.editAttendanceForm)
+                            .update(updateData)
                             .eq('id', this.editAttendanceForm.id);
 
                         if (error) throw error;
@@ -1045,7 +1081,7 @@ async submitAttendanceForm() {
                         alert('Absensi berhasil diupdate!');
                     } catch (err) {
                         console.error('Error updating attendance record:', err);
-                        alert('Terjadi kesalahan saat mengupdate absensi.');
+                        alert(`Terjadi kesalahan: ${err.message}`);
                     } finally {
                         this.isLoading = false;
                     }
@@ -1348,7 +1384,7 @@ async submitAttendanceForm() {
         input:focus,
         select:focus,
         textarea:focus {
-            outline: 2px solid #2563eb;
+            outline: 2px solid #e65705;
             outline-offset: 2px;
         }
         
