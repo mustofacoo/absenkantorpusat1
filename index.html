@@ -3,1476 +3,1734 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi Kantor</title>
+    <title>KPI Kantor Pusat</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        [x-cloak] { display: none !important; }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            color: #065f46;
+        }
+        
+        .notification.error {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .notification.info {
+            background-color: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
     </style>
 </head>
-<body class="h-full bg-slate-50" x-data="attendanceApp()" x-init="init()">
-    
-    <!-- Loading Spinner -->
-    <div x-show="isLoading" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-[100]">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600"></div>
-    </div>
-
-    <!-- Login Page -->
-    <div x-show="currentPage === 'login'" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div class="text-center">
-                <div class="mx-auto h-16 w-16 bg-blue-600 rounded-2xl flex items-center justify-center">
-                    <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+<body class="h-full bg-gray-50">
+    <div x-data="kpiApp()" x-cloak x-init="init()" class="min-h-full">
+        <!-- Notification -->
+<!-- Perbaiki bagian HTML notifikasi -->
+<!-- Notification -->
+        <div x-show="notification.show" 
+            :class="['notification', notification.type]"
+            x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="opacity-0 translate-x-full"
+            x-transition:enter-end="opacity-100 translate-x-0"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="opacity-100 translate-x-0"
+            x-transition:leave-end="opacity-0 translate-x-full"
+            style="display: none;">
+            <div class="flex justify-between items-start">
+                <p x-text="notification.message" class="flex-1 pr-3"></p>
+                <button @click="hideNotification()" class="ml-2 text-gray-400 hover:text-gray-600 flex-shrink-0">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                     </svg>
-                </div>
-                <h2 class="mt-6 text-3xl font-bold text-slate-900">Absen Kantor Pusat Ibnu Kastir</h2>
-                <p class="mt-2 text-sm text-slate-600">Bismillah | Alhamdulillah</p>
-            </div>
-
-            <div class="mt-8 space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                    <button @click="showLogin('employee')" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 min-h-[44px]">
-                        Pegawai
-                    </button>
-                    <button @click="showLogin('admin')" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 min-h-[44px]">
-                        Admin
-                    </button>
-                </div>
-
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-slate-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-2 bg-slate-50 text-slate-500">Akses KPI dan Amal Yaumi</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                <a href="https://quran.com/" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 min-h-[44px] items-center">
-                    KPI 
-                </a>
-                <a href="https://quran.com/" target="_blank" class="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-lg shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 min-h-[44px] items-center">
-                    Amal Yaumi
-                </a>
-            </div>
+                </button>
             </div>
         </div>
-    </div>
 
-    <!-- Login Modal -->
-    <div x-show="showLoginModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-            <div class="mt-3 text-center">
-                <h3 class="text-lg font-medium text-slate-900" x-text="loginType === 'employee' ? 'Login Pegawai' : 'Login Admin'"></h3>
-                <div class="mt-4 px-7 py-3">
-                    <form @submit.prevent="login()" class="space-y-4">
-                        <input x-model="loginForm.username" type="text" placeholder="Username" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <input x-model="loginForm.password" type="password" placeholder="Password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
-                                Login
-                            </button>
-                            <button @click="closeLoginModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Employee Dashboard -->
-    <div x-show="currentPage === 'employee'" class="min-h-screen" x-cloak>
-        <!-- Mobile Header -->
-        <header class="bg-white shadow-sm">
+        <!-- Navigation -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-4">
-                    <div>
-                        <h1 class="text-xl font-semibold text-slate-900">Dashboard Pegawai</h1>
-                        <p class="text-sm text-slate-600" x-text="'Halo, ' + currentUser.name"></p>
-                    </div>
-                    <button @click="logout()" class="text-slate-500 hover:text-slate-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <!-- Today's Attendance -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-lg font-semibold text-slate-900 mb-4">Absensi Hari Ini</h2>
-                <div class="text-center mb-4">
-                    <div class="text-3xl font-bold text-slate-900" x-text="currentTime"></div>
-                    <div class="text-sm text-slate-600" x-text="currentDate"></div>
-                </div>
-                
-                <div x-show="!todayAttendance" class="space-y-3">
-                    <div class="grid grid-cols-2 gap-3">
-                        <button @click="markAttendance('present')" class="bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 font-medium min-h-[44px] flex items-center justify-center">
-                            Hadir Tepat Waktu
-                        </button>
-                        <button @click="showAttendanceForm('late')" class="bg-amber-600 text-white py-3 px-4 rounded-lg hover:bg-amber-700 font-medium min-h-[44px] flex items-center justify-center">
-                            Terlambat
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button @click="showAttendanceForm('sick')" class="bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 font-medium min-h-[44px] flex items-center justify-center">
-                            Sakit
-                        </button>
-                        <button @click="showAttendanceForm('leave')" class="bg-slate-600 text-white py-3 px-4 rounded-lg hover:bg-slate-700 font-medium min-h-[44px] flex items-center justify-center">
-                            Izin
-                        </button>
-                    </div>
-                    <button @click="showAttendanceForm('wfe')" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium min-h-[44px] flex items-center justify-center">
-                        Tugas diluar
-                    </button>
-                </div>
-
-                <div x-show="todayAttendance" class="text-center p-4 bg-emerald-50 rounded-lg">
-                    <div class="text-emerald-800 font-medium">Sudah absen</div>
-                    <div class="text-sm text-emerald-600 mt-1" x-text="todayAttendance ? 'Status: ' + getStatusText(todayAttendance.status) + ' pada ' + todayAttendance.time : ''"></div>
-                </div>
-            </div>
-
-            <!-- Monthly Summary -->
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <h2 class="text-lg font-semibold text-slate-900 mb-4">Ringkasan Bulan Ini</h2>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="text-center p-3 bg-emerald-50 rounded-lg">
-                        <div class="text-2xl font-bold text-emerald-600" x-text="monthlyStats.present"></div>
-                        <div class="text-sm text-emerald-700">Hadir</div>
-                    </div>
-                    <div class="text-center p-3 bg-amber-50 rounded-lg">
-                        <div class="text-2xl font-bold text-amber-600" x-text="monthlyStats.late"></div>
-                        <div class="text-sm text-amber-700">Terlambat</div>
-                    </div>
-                    <div class="text-center p-3 bg-red-50 rounded-lg">
-                        <div class="text-2xl font-bold text-red-600" x-text="monthlyStats.sick"></div>
-                        <div class="text-sm text-red-700">Sakit</div>
-                    </div>
-                    <div class="text-center p-3 bg-slate-50 rounded-lg">
-                        <div class="text-2xl font-bold text-slate-600" x-text="monthlyStats.leave"></div>
-                        <div class="text-sm text-slate-700">Izin</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent History -->
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-lg font-semibold text-slate-900 mb-4">Riwayat Absensi</h2>
-                <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-                    <template x-for="record in attendanceHistory" :key="record.date">
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                            <div>
-                                <div class="font-medium text-slate-900" x-text="formatDate(record.date)"></div>
-                                <div class="text-sm text-slate-600" x-text="record.time"></div>
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-gray-900">KPI Kantor Pusat</h1>
+                        </div>
+                        <template x-if="currentUser">
+                            <div class="ml-6 text-sm text-gray-600">
+                                Selamat datang, <span class="font-medium" x-text="currentUser.name"></span>
+                                <span class="text-xs text-gray-400" x-text="`(${currentUser.role})`"></span>
                             </div>
-                            <div class="flex items-center">
-                                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getStatusClass(record.status)" x-text="getStatusText(record.status)"></span>
+                        </template>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- Employee Navigation -->
+                        <template x-if="currentUser && currentUser.role === 'employee'">
+                            <div class="flex items-center space-x-2">
+                                <button @click="currentView = 'employee'" 
+                                        :class="currentView === 'employee' ? 'text-primary-600 border-primary-500' : 'text-gray-500 border-transparent'"
+                                        class="border-b-2 px-3 py-2 text-sm font-medium">
+                                    Dashboard Saya
+                                </button>
+                                <button @click="logout()" 
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+                                    Logout
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Admin Navigation -->
+                        <template x-if="currentUser && currentUser.role === 'admin'">
+                            <div class="flex space-x-2">
+                                <button @click="currentView = 'employees'" 
+                                        :class="currentView === 'employees' ? 'text-primary-600 border-primary-500' : 'text-gray-500 border-transparent'"
+                                        class="border-b-2 px-3 py-2 text-sm font-medium">
+                                    Kelola Pegawai
+                                </button>
+                                <button @click="currentView = 'assign'" 
+                                        :class="currentView === 'assign' ? 'text-primary-600 border-primary-500' : 'text-gray-500 border-transparent'"
+                                        class="border-b-2 px-3 py-2 text-sm font-medium">
+                                    Kelola KPI
+                                </button>
+                                <button @click="currentView = 'monthly'" 
+                                        :class="currentView === 'monthly' ? 'text-primary-600 border-primary-500' : 'text-gray-500 border-transparent'"
+                                        class="border-b-2 px-3 py-2 text-sm font-medium">
+                                    Laporan Bulanan
+                                </button>
+                                <button @click="currentView = 'detail'" 
+                                        :class="currentView === 'detail' ? 'text-primary-600 border-primary-500' : 'text-gray-500 border-transparent'"
+                                        class="border-b-2 px-3 py-2 text-sm font-medium">
+                                    Detail Pegawai
+                                </button>
+                                <button @click="logout()" 
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700">
+                                    Logout
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Guest Navigation -->
+                        <template x-if="!currentUser">
+                            <div class="flex space-x-2">
+                                <button @click="showEmployeeLogin = true" 
+                                        class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700">
+                                    Login Pegawai
+                                </button>
+                                <button @click="showAdminLogin = true" 
+                                        class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700">
+                                    Login Admin
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 shadow-lg">
+                <div class="flex items-center space-x-3">
+                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+                    <span class="text-gray-700">Memuat data...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Login Modal -->
+        <div x-show="showEmployeeLogin" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Login Pegawai</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input x-model="employeeCredentials.username" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Password</label>
+                            <input x-model="employeeCredentials.password" type="password" 
+                                   @keyup.enter="loginEmployee()"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Demo: syafiq / syafiq123 atau naimah / naimah123
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button @click="cancelEmployeeLogin()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Batal
+                        </button>
+                        <button @click="loginEmployee()" 
+                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                            Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login Modal -->
+        <div x-show="showAdminLogin" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Login Admin</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input x-model="adminCredentials.username" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Password</label>
+                            <input x-model="adminCredentials.password" type="password" 
+                                   @keyup.enter="loginAdmin()"
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            Demo: admin / admin123
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button @click="cancelAdminLogin()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Batal
+                        </button>
+                        <button @click="loginAdmin()" 
+                                class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">
+                            Login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Welcome Message for Guests -->
+            <template x-if="!currentUser">
+                <div class="bg-white shadow rounded-lg p-8 text-center">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Kantor Pusat Ibnu Katsir</h2>
+                    <p class="text-gray-600 mb-6">Sistem monitoring dan pelaporan KPI untuk mujahid Ibnu Katsir</p>
+                    <div class="flex justify-center space-x-4">
+                        <button @click="showEmployeeLogin = true" 
+                                class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 font-medium">
+                            Login sebagai Pegawai
+                        </button>
+                        <button @click="showAdminLogin = true" 
+                                class="bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 font-medium">
+                            Login sebagai Admin
+                        </button>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Employee Dashboard -->
+            <div x-show="currentView === 'employee' && currentUser" class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Dashboard KPI Saya</h2>
+                    <p class="text-sm text-gray-600 mb-4">Kelola progress KPI Anda untuk bulan ini</p>
+                </div>
+
+                <template x-if="employeeKPIs.length > 0">
+                    <div class="space-y-6">
+                        <!-- KPI Summary -->
+                        <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Ringkasan KPI</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-primary-600" x-text="employeeKPIs.length"></div>
+                                    <div class="text-sm text-gray-600">Total KPI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600" x-text="getCompletedKPIs()"></div>
+                                    <div class="text-sm text-gray-600">KPI Selesai</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600" x-text="`${getAverageProgress()}%`"></div>
+                                    <div class="text-sm text-gray-600">Rata-rata Progress</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- KPI Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <template x-for="kpi in employeeKPIs" :key="kpi.id">
+                                <div class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-medium text-gray-900" x-text="kpi.title"></h3>
+                                        <span :class="getKPIStatusColor(kpi)" 
+                                              class="px-2 py-1 rounded-full text-xs font-medium"
+                                              x-text="getKPIStatus(kpi)">
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-4" x-text="kpi.description"></p>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between text-sm">
+                                            <span>Progress:</span>
+                                            <span class="font-medium" x-text="`${kpi.current}/${kpi.target} (${Math.round((kpi.current / kpi.target) * 100)}%)`"></span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-3">
+                                            <div :class="getProgressBarColor(kpi)" 
+                                                 class="h-3 rounded-full transition-all duration-300" 
+                                                 :style="`width: ${Math.min((kpi.current / kpi.target) * 100, 100)}%`">
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-center space-x-3">
+                                            <button @click="updateKPIProgress(kpi, -1)" 
+                                                    :disabled="kpi.current <= 0"
+                                                    class="bg-red-500 text-white w-10 h-10 rounded-full text-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center transition-colors">
+                                                -
+                                            </button>
+                                            <span class="flex items-center px-4 py-2 bg-gray-100 rounded-lg text-lg font-bold min-w-[80px] justify-center" 
+                                                  x-text="kpi.current">
+                                            </span>
+                                            <button @click="updateKPIProgress(kpi, 1)" 
+                                                    :disabled="kpi.current >= kpi.target"
+                                                    class="bg-green-500 text-white w-10 h-10 rounded-full text-lg hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center transition-colors">
+                                                +
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Additional Work Report -->
+                        <div class="bg-white shadow rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Laporan Pekerjaan di Luar KPI</h3>
+                            <div class="space-y-4">
+                                <textarea x-model="additionalWorkReport" rows="4" 
+                                          placeholder="Deskripsikan pekerjaan yang dilakukan di luar KPI hari ini..."
+                                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                </textarea>
+                                <button @click="submitAdditionalWork()" 
+                                        :disabled="!additionalWorkReport.trim()"
+                                        class="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                                    Submit Laporan
+                                </button>
+                            </div>
+                            
+                            <!-- Recent Additional Work Reports -->
+                            <template x-if="getRecentAdditionalWork().length > 0">
+                                <div class="mt-6">
+                                    <h4 class="text-md font-medium text-gray-900 mb-3">Laporan Terbaru</h4>
+                                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                                        <template x-for="report in getRecentAdditionalWork()" :key="report.id">
+                                            <div class="bg-gray-50 rounded-lg p-3 text-sm">
+                                                <div class="flex justify-between items-start mb-1">
+                                                    <span class="font-medium text-gray-900">Tanggal: <span x-text="formatDate(report.date)"></span></span>
+                                                </div>
+                                                <p class="text-gray-700" x-text="report.description"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="employeeKPIs.length === 0 && currentUser">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">Tidak ada KPI untuk bulan ini</h3>
+                                <p class="mt-1 text-sm text-yellow-700">Hubungi admin untuk mendapatkan KPI yang sesuai dengan tugas Anda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Admin: Employee Management -->
+            <div x-show="currentView === 'employees'" class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-medium text-gray-900">Kelola Pegawai</h2>
+                        <button @click="showAddEmployee = true" 
+                                class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+                            Tambah Pegawai
+                        </button>
+                    </div>
+
+                    <!-- Employee List -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posisi</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="employee in employees" :key="employee.id">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="employee.name"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="employee.position"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="employee.username || '-'"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="employee.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'" 
+                                                  class="px-2 py-1 rounded-full text-xs font-medium"
+                                                  x-text="employee.role === 'admin' ? 'Admin' : 'Pegawai'">
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="employee.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                                                  class="px-2 py-1 rounded-full text-xs font-medium"
+                                                  x-text="employee.status === 'active' ? 'Aktif' : 'Nonaktif'">
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                            <button @click="editEmployee(employee)" class="text-primary-600 hover:text-primary-900">Edit</button>
+                                            <button @click="toggleEmployeeStatus(employee)" 
+                                                    :class="employee.status === 'active' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
+                                                    x-text="employee.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'">
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Assign KPI -->
+            <div x-show="currentView === 'assign'" class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-lg font-medium text-gray-900">Kelola KPI Pegawai</h2>
+                        <button @click="showAddKPI = true" 
+                                class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+                            Tambah KPI
+                        </button>
+                    </div>
+
+                    <!-- KPI List -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pegawai</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">KPI</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="kpi in allKPIs" :key="kpi.id">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" 
+                                            x-text="getEmployeeName(kpi.employeeId)"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-sm font-medium text-gray-900" x-text="kpi.title"></div>
+                                            <div class="text-sm text-gray-500" x-text="kpi.description"></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="kpi.target"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="flex-1 mr-2">
+                                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-primary-600 h-2 rounded-full" 
+                                                             :style="`width: ${Math.min((kpi.current / kpi.target) * 100, 100)}%`">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="text-sm text-gray-900" x-text="`${kpi.current}/${kpi.target}`"></span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" x-text="formatPeriod(kpi.period)"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                            <button @click="editKPI(kpi)" class="text-primary-600 hover:text-primary-900">Edit</button>
+                                            <button @click="deleteKPI(kpi.id)" class="text-red-600 hover:text-red-900">Hapus</button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Monthly Report -->
+            <div x-show="currentView === 'monthly'" class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-6">Laporan KPI Bulanan</h2>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Bulan</label>
+                        <input x-model="selectedMonth" type="month" 
+                               @change="loadMonthlyReport()"
+                               class="rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <template x-for="employee in getActiveEmployees()" :key="employee.id">
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h3 class="font-medium text-gray-900 mb-3" x-text="employee.name"></h3>
+                                <div class="space-y-2">
+                                    <template x-for="kpi in getEmployeeKPIsForMonth(employee.id, selectedMonth)" :key="kpi.id">
+                                        <div class="bg-white rounded p-3">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm font-medium" x-text="kpi.title"></span>
+                                                <span class="text-sm text-gray-600" x-text="`${Math.round((kpi.current / kpi.target) * 100)}%`"></span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-primary-600 h-2 rounded-full" 
+                                                     :style="`width: ${Math.min((kpi.current / kpi.target) * 100, 100)}%`">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <div class="text-xs text-gray-500 mt-2">
+                                        Rata-rata pencapaian: <span x-text="`${getEmployeeAverageKPI(employee.id)}%`"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Employee Detail -->
+            <div x-show="currentView === 'detail'" class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-6">Detail Progres Pegawai</h2>
+                    
+                    <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Pegawai</label>
+                            <select x-model="selectedEmployeeDetail" @change="loadEmployeeDetail()"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="">-- Pilih Pegawai --</option>
+                                <template x-for="employee in getActiveEmployees()" :key="employee.id">
+                                    <option :value="employee.id" x-text="employee.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter Bulan</label>
+                            <input x-model="selectedDetailMonth" type="month" 
+                                   @change="loadEmployeeDetail()"
+                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                    </div>
+
+                    <template x-if="selectedEmployeeDetail">
+                        <div class="space-y-6">
+                            <!-- KPI Progress -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-900 mb-4">Progress KPI</h3>
+                                <div class="space-y-4">
+                                    <template x-for="kpi in getFilteredEmployeeKPIs(selectedEmployeeDetail)" :key="kpi.id">
+                                        <div class="border rounded-lg p-4">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <h4 class="font-medium text-gray-900" x-text="kpi.title"></h4>
+                                                    <p class="text-sm text-gray-600" x-text="kpi.description"></p>
+                                                </div>
+                                                <span :class="getKPIStatusColor(kpi)" 
+                                                      class="px-2 py-1 rounded-full text-xs font-medium"
+                                                      x-text="getKPIStatus(kpi)">
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="text-sm text-gray-600">Progress:</span>
+                                                <span class="text-sm font-medium" x-text="`${kpi.current}/${kpi.target} (${Math.round((kpi.current / kpi.target) * 100)}%)`"></span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                                <div class="bg-primary-600 h-3 rounded-full" 
+                                                     :style="`width: ${Math.min((kpi.current / kpi.target) * 100, 100)}%`">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Additional Work Reports -->
+                            <div>
+                                <h3 class="text-md font-medium text-gray-900 mb-4">Laporan Tugas di Luar KPI</h3>
+                                <div class="space-y-3">
+                                    <template x-for="report in getFilteredEmployeeAdditionalWork(selectedEmployeeDetail)" :key="report.id">
+                                        <div class="bg-gray-50 rounded-lg p-4">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <span class="text-sm font-medium text-gray-900">Laporan</span>
+                                                <span class="text-xs text-gray-500" x-text="formatDate(report.date)"></span>
+                                            </div>
+                                            <p class="text-sm text-gray-700" x-text="report.description"></p>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </template>
                 </div>
             </div>
         </main>
-    </div>
 
-    <!-- Admin Dashboard -->
-    <div x-show="currentPage === 'admin'" class="min-h-screen" x-cloak>
-        <!-- Admin Header -->
-        <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-4">
-                    <div>
-                        <h1 class="text-xl font-semibold text-slate-900">Dashboard Admin</h1>
-                        <p class="text-sm text-slate-600">Panel Manajemen Absensi</p>
-                    </div>
-                    <button @click="logout()" class="text-slate-500 hover:text-slate-700">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- Admin Tabs -->
-                <div class="flex space-x-8 border-b border-slate-200">
-                    <button @click="adminTab = 'overview'" :class="adminTab === 'overview' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
-                        Overview
-                    </button>
-                    <button @click="adminTab = 'employees'" :class="adminTab === 'employees' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
-                        Pegawai
-                    </button>
-                    <button @click="adminTab = 'attendance'" :class="adminTab === 'attendance' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
-                        Absensi
-                    </button>
-                    <button @click="adminTab = 'reports'; initChart()" :class="adminTab === 'reports' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500'" class="py-2 px-1 border-b-2 font-medium text-sm">
-                        Laporan
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <!-- Overview Tab -->
-            <div x-show="adminTab === 'overview'">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-blue-100">
-                                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-2xl font-bold text-slate-900" x-text="employees.length"></div>
-                                <div class="text-sm text-slate-600">Total Pegawai</div>
-                            </div>
+        <!-- Add Employee Modal -->
+        <div x-show="showAddEmployee" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4" x-text="editingEmployee ? 'Edit Pegawai' : 'Tambah Pegawai Baru'"></h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                            <input x-model="newEmployee.name" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Posisi</label>
+                            <input x-model="newEmployee.position" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input x-model="newEmployee.username" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Password</label>
+                            <input x-model="newEmployee.password" type="password" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Role</label>
+                            <select x-model="newEmployee.role" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="employee">Pegawai</option>
+                                <option value="admin">Admin</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-emerald-100">
-                                <svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-2xl font-bold text-slate-900" x-text="todayPresentCount"></div>
-                                <div class="text-sm text-slate-600">Hadir Hari Ini</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex items-center">
-                            <div class="p-3 rounded-full bg-amber-100">
-                                <svg class="h-6 w-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-2xl font-bold text-slate-900" x-text="employees.length - todayPresentCount"></div>
-                                <div class="text-sm text-slate-600">Belum Absen</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Today's Attendance List -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-4">Status Absensi Hari Ini</h2>
-                    <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-                        <template x-for="employee in employees" :key="employee.id">
-                            <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium text-slate-900" x-text="employee.name"></div>
-                                    <div class="text-sm text-slate-600" x-text="employee.position"></div>
-                                </div>
-                                <div class="flex items-center">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getTodayStatusClass(employee.id)" x-text="getTodayStatusText(employee.id)"></span>
-                                </div>
-                            </div>
-                        </template>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button @click="cancelAddEmployee()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Batal
+                        </button>
+                        <button @click="saveEmployee()" 
+                                :disabled="!newEmployee.name || !newEmployee.position || !newEmployee.username || !newEmployee.password"
+                                class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span x-text="editingEmployee ? 'Update' : 'Simpan'"></span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Employees Tab -->
-            <div x-show="adminTab === 'employees'">
-                <div class="bg-white rounded-xl shadow-sm">
-                    <div class="p-6 border-b border-slate-200">
-                        <div class="flex justify-between items-center">
-                            <h2 class="text-lg font-semibold text-slate-900">Manajemen Pegawai</h2>
-                            <button @click="showEmployeeModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium">
-                                + Tambah Pegawai
-                            </button>
+        <!-- Add KPI Modal -->
+        <div x-show="showAddKPI" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4" x-text="editingKPI ? 'Edit KPI' : 'Tambah KPI Baru'"></h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Pegawai</label>
+                            <select x-model="newKPI.employeeId" 
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                                <option value="">-- Pilih Pegawai --</option>
+                                <template x-for="employee in getActiveEmployees()" :key="employee.id">
+                                    <option :value="employee.id" x-text="employee.name"></option>
+                                </template>
+                            </select>
                         </div>
-                    </div>
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-slate-200">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Jabatan</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-200">
-                                    <template x-for="employee in employees" :key="employee.id">
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900" x-text="employee.name"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500" x-text="employee.position"></td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span :class="employee.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                                                    <span x-text="employee.status === 'active' ? 'Aktif' : 'Nonaktif'"></span>
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                                <button @click="editEmployee(employee)" class="text-blue-600 hover:text-blue-900">Edit</button>
-                                                <button @click="deleteEmployee(employee.id)" class="text-red-600 hover:text-red-900">Hapus</button>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Judul KPI</label>
+                            <input x-model="newKPI.title" type="text" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Attendance Tab -->
-            <div x-show="adminTab === 'attendance'">
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-slate-900 mb-4">Monitoring Absensi</h2>
-                    <div class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
-                        <template x-for="record in allAttendanceRecords" :key="record.id">
-                            <div class="flex justify-between items-center p-4 bg-slate-50 rounded-lg">
-                                <div class="flex-1">
-                                    <div class="font-medium text-slate-900" x-text="getEmployeeName(record.employeeId)"></div>
-                                    <div class="text-sm text-slate-600" x-text="formatDate(record.date) + ' - ' + record.time"></div>
-                                    <div x-show="record.reason" class="text-sm text-slate-500" x-text="'Alasan: ' + record.reason"></div>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getStatusClass(record.status)" x-text="getStatusText(record.status)"></span>
-                                    <button @click="editAttendanceRecord(record)" class="text-blue-600 hover:text-blue-900 text-sm">Edit</button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reports Tab -->
-            <div x-show="adminTab === 'reports'">
-                <div class="space-y-6">
-                    <!-- Monthly Report Filter -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-slate-900 mb-4">Filter Laporan Bulanan</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">Bulan & Tahun</label>
-                                <input 
-                                    x-model="reportFilter.month" 
-                                    @change="updateReports()"
-                                    type="month" 
-                                    class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div class="flex items-end">
-                                <button 
-                                    @click="exportMonthlyReport()" 
-                                    class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 font-medium">
-                                    Export Excel
-                                </button>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                            <textarea x-model="newKPI.description" rows="3" 
+                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                            </textarea>
                         </div>
-                    </div>
-
-                    <!-- Monthly Chart -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold text-slate-900">
-                                Laporan Absensi Bulanan - <span x-text="getSelectedMonthText()"></span>
-                            </h2>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Target</label>
+                            <input x-model="newKPI.target" type="number" min="1" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                         </div>
-                        <div class="mb-4 grid grid-cols-2 md:grid-cols-5 gap-4">
-                            <div class="text-center p-3 bg-emerald-50 rounded-lg">
-                                <div class="text-xl font-bold text-emerald-600" x-text="monthlyReportStats.present"></div>
-                                <div class="text-xs text-emerald-700">Hadir</div>
-                            </div>
-                            <div class="text-center p-3 bg-amber-50 rounded-lg">
-                                <div class="text-xl font-bold text-amber-600" x-text="monthlyReportStats.late"></div>
-                                <div class="text-xs text-amber-700">Terlambat</div>
-                            </div>
-                            <div class="text-center p-3 bg-red-50 rounded-lg">
-                                <div class="text-xl font-bold text-red-600" x-text="monthlyReportStats.sick"></div>
-                                <div class="text-xs text-red-700">Sakit</div>
-                            </div>
-                            <div class="text-center p-3 bg-slate-50 rounded-lg">
-                                <div class="text-xl font-bold text-slate-600" x-text="monthlyReportStats.leave"></div>
-                                <div class="text-xs text-slate-700">Izin</div>
-                            </div>
-                            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                                <div class="text-xl font-bold text-blue-600" x-text="monthlyReportStats.wfe"></div>
-                                <div class="text-xs text-blue-700">wfe</div>
-                            </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Periode</label>
+                            <input x-model="newKPI.period" type="month" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                         </div>
-                        <div style="position: relative; height: 400px; width: 100%;">
-                        <canvas id="attendanceChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Monthly Attendance Rate per Employee -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="text-lg font-semibold text-slate-900 mb-4">
-                            Tingkat Kehadiran per Pegawai - <span x-text="getSelectedMonthText()"></span>
-                        </h3>
-                        <div class="space-y-4">
-                            <template x-for="employee in getFilteredEmployees()" :key="employee.id">
-                                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-                                    <div class="flex-1">
-                                        <div class="font-medium text-slate-900" x-text="employee.name"></div>
-                                        <div class="text-sm text-slate-600" x-text="employee.position"></div>
-                                        <div class="text-xs text-slate-500 mt-1">
-                                            <span x-text="getMonthlyEmployeeStats(employee.id).present + ' hadir'"></span>,
-                                            <span x-text="getMonthlyEmployeeStats(employee.id).late + ' terlambat'"></span>,
-                                            <span x-text="getMonthlyEmployeeStats(employee.id).sick + ' sakit'"></span>,
-                                            <span x-text="getMonthlyEmployeeStats(employee.id).leave + ' izin'"></span>
-                                        </div>
-                                    </div>
-                                    <div class="text-right ml-4">
-                                        <div class="text-2xl font-bold text-slate-900" x-text="getMonthlyAttendanceRate(employee.id) + '%'"></div>
-                                        <div class="text-sm text-slate-600">Tingkat Hadir</div>
-                                        <div class="w-24 bg-slate-200 rounded-full h-2 mt-1">
-                                            <div class="bg-blue-600 h-2 rounded-full" :style="'width: ' + getMonthlyAttendanceRate(employee.id) + '%'"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Attendance Form Modal -->
-    <div x-show="showAttendanceModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-slate-900 text-center" x-text="getAttendanceModalTitle()"></h3>
-                <div class="mt-4 px-7 py-3">
-                    <form @submit.prevent="submitAttendanceForm()" class="space-y-4">
-                        <div x-show="attendanceForm.type === 'late' || attendanceForm.type === 'leave' || attendanceForm.type === 'wfe'">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">
-                                <span x-text="attendanceForm.type === 'late' ? 'Alasan Terlambat' : (attendanceForm.type === 'leave' ? 'Alasan Izin' : 'Keterangan wfe')"></span>
+                        <div>
+                            <label class="flex items-center space-x-2">
+                                <input x-model="newKPI.isRecurring" type="checkbox" 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                                <span class="text-sm font-medium text-gray-700">KPI Berulang Setiap Bulan</span>
                             </label>
-                            <textarea x-model="attendanceForm.reason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" required></textarea>
                         </div>
-                        <div x-show="attendanceForm.type === 'sick'">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Keterangan Sakit</label>
-                            <textarea x-model="attendanceForm.reason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Contoh: Demam, sakit kepala..."></textarea>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
-                                Submit Absensi
-                            </button>
-                            <button @click="closeAttendanceModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Employee Form Modal -->
-    <div x-show="showEmployeeFormModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
-        <div class="relative top-10 mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-slate-900 text-center" x-text="employeeForm.id ? 'Edit Pegawai' : 'Tambah Pegawai Baru'"></h3>
-                <div class="mt-4 px-7 py-3">
-                    <form @submit.prevent="submitEmployeeForm()" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
-                            <input x-model="employeeForm.name" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Jabatan</label>
-                            <input x-model="employeeForm.position" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
-                            <input x-model="employeeForm.username" type="text" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div x-show="!employeeForm.id">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
-                            <input x-model="employeeForm.password" type="password" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" :required="!employeeForm.id">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-                            <select x-model="employeeForm.status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="active">Aktif</option>
-                                <option value="inactive">Nonaktif</option>
-                            </select>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
-                                <span x-text="employeeForm.id ? 'Update' : 'Simpan'"></span>
-                            </button>
-                            <button @click="closeEmployeeModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Attendance Modal -->
-    <div x-show="showEditAttendanceModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-xl bg-white">
-            <div class="mt-3">
-                <h3 class="text-lg font-medium text-slate-900 text-center">Edit Absensi</h3>
-                <div class="mt-4 px-7 py-3">
-                    <form @submit.prevent="submitEditAttendance()" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Pegawai</label>
-                            <input :value="getEmployeeName(editAttendanceForm.employeeId)" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-100" readonly>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal</label>
-                            <input x-model="editAttendanceForm.date" type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-                            <select x-model="editAttendanceForm.status" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="present">Hadir</option>
-                                <option value="late">Terlambat</option>
-                                <option value="sick">Sakit</option>
-                                <option value="leave">Izin</option>
-                                <option value="wfe">wfe</option>
-                                <option value="absent">Tidak Hadir</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">Catatan Admin</label>
-                            <textarea x-model="editAttendanceForm.adminNote" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Catatan tambahan..."></textarea>
-                        </div>
-                        <div class="flex space-x-2">
-                            <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium">
-                                Update
-                            </button>
-                            <button @click="closeEditAttendanceModal()" type="button" class="flex-1 bg-slate-300 text-slate-700 py-2 px-4 rounded-lg hover:bg-slate-400 font-medium">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
+                    </div>
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button @click="cancelAddKPI()" 
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                            Batal
+                        </button>
+                        <button @click="saveKPI()" 
+                                :disabled="!newKPI.employeeId || !newKPI.title || !newKPI.target"
+                                class="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <span x-text="editingKPI ? 'Update' : 'Simpan'"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Variabel untuk menyimpan URL dan Kunci Supabase Anda
-const supabaseUrl = 'https://vbvcydgjptjroclgcxzw.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidmN5ZGdqcHRqcm9jbGdjeHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUzMzYwODgsImV4cCI6MjA3MDkxMjA4OH0.7qhvpdcrMktJMISBzwU-PfVdSHqDnrOQKDM18-hMYN8';
+        // KONFIGURASI SUPABASE - GANTI DENGAN DATA PROJECT ANDA
+        const SUPABASE_CONFIG = {
+            url: 'https://ksjjcnhlqacmdelmngjx.supabase.co', // Ganti dengan URL project Anda
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzampjbmhscWFjbWRlbG1uZ2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwOTg4MDUsImV4cCI6MjA3MTY3NDgwNX0.Dm1KuOl9cAZfKDYhv3zkhs--5XqUkPbVIV5bqZOiWko' // Ganti dengan anon key Anda
+        };
 
-// Ganti nama variabel untuk menghindari conflict
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        // Supabase Service dengan semua method yang diperlukan
+        const SupabaseService = {
+            supabase: null,
+            
+            init() {
+                try {
+                    this.supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                    console.log('Supabase initialized successfully');
+                    return true;
+                } catch (error) {
+                    console.error('Failed to initialize Supabase:', error);
+                    return false;
+                }
+            },
 
-        function attendanceApp() {
+            // Employee methods
+            async getEmployees() {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('employees')
+                        .select('*')
+                        .order('name');
+                    
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error fetching employees:', error);
+                    throw error;
+                }
+            },
+
+            async createEmployee(employeeData) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('employees')
+                        .insert([{
+                            name: employeeData.name,
+                            position: employeeData.position,
+                            username: employeeData.username,
+                            password: employeeData.password,
+                            role: employeeData.role,
+                            status: employeeData.status || 'active'
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error creating employee:', error);
+                    throw error;
+                }
+            },
+
+            async updateEmployee(employeeId, employeeData) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('employees')
+                        .update({
+                            name: employeeData.name,
+                            position: employeeData.position,
+                            username: employeeData.username,
+                            password: employeeData.password,
+                            role: employeeData.role,
+                            status: employeeData.status
+                        })
+                        .eq('id', employeeId)
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error updating employee:', error);
+                    throw error;
+                }
+            },
+
+            async loginEmployee(username, password) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('employees')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password', password)
+                        .eq('status', 'active')
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Employee login error:', error);
+                    throw error;
+                }
+            },
+
+            // KPI methods
+            async getKPIs() {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('kpis')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error fetching KPIs:', error);
+                    throw error;
+                }
+            },
+
+            async getEmployeeKPIs(employeeId, period) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('kpis')
+                        .select('*')
+                        .eq('employee_id', employeeId)
+                        .eq('period', period)
+                        .order('created_at');
+                    
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error fetching employee KPIs:', error);
+                    throw error;
+                }
+            },
+
+            async createKPI(kpiData) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('kpis')
+                        .insert([{
+                            employee_id: parseInt(kpiData.employeeId),
+                            title: kpiData.title,
+                            description: kpiData.description,
+                            target: parseInt(kpiData.target),
+                            current_value: kpiData.current || 0,
+                            period: kpiData.period,
+                            is_recurring: kpiData.isRecurring || false
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error creating KPI:', error);
+                    throw error;
+                }
+            },
+
+            async updateKPI(kpiId, kpiData) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('kpis')
+                        .update(kpiData)
+                        .eq('id', kpiId)
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error updating KPI:', error);
+                    throw error;
+                }
+            },
+
+            async updateKPIProgress(kpiId, newValue) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('kpis')
+                        .update({ current_value: newValue })
+                        .eq('id', kpiId)
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error updating KPI progress:', error);
+                    throw error;
+                }
+            },
+
+            async deleteKPI(kpiId) {
+                try {
+                    const { error } = await this.supabase
+                        .from('kpis')
+                        .delete()
+                        .eq('id', kpiId);
+                    
+                    if (error) throw error;
+                    return true;
+                } catch (error) {
+                    console.error('Error deleting KPI:', error);
+                    throw error;
+                }
+            },
+
+            // Additional Work methods
+            async getAdditionalWork() {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('additional_work')
+                        .select('*')
+                        .order('work_date', { ascending: false });
+                    
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error fetching additional work:', error);
+                    throw error;
+                }
+            },
+
+            async createAdditionalWork(workData) {
+                try {
+                    const { data, error } = await this.supabase
+                        .from('additional_work')
+                        .insert([{
+                            employee_id: workData.employeeId,
+                            description: workData.description,
+                            work_date: workData.date
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (error) throw error;
+                    return data;
+                } catch (error) {
+                    console.error('Error creating additional work:', error);
+                    throw error;
+                }
+            }
+        };
+
+        function kpiApp() {
             return {
-                // Current state
-                currentPage: 'login',
+                // System state
+                loading: false,
                 currentUser: null,
-                currentTime: '',
-                currentDate: '',
-                adminTab: 'overview',
+                supabaseConnected: false,
                 
-                // Modals
-                showLoginModal: false,
-                showAttendanceModal: false,
-                showEmployeeFormModal: false,
-                showEditAttendanceModal: false,
-                loginType: 'employee',
+                // Auth state
+                showEmployeeLogin: false,
+                showAdminLogin: false,
+                employeeCredentials: { username: '', password: '' },
+                adminCredentials: { username: '', password: '' },
                 
-                // Forms
-                loginForm: { username: '', password: '' },
-                attendanceForm: { type: '', reason: '' },
-                employeeForm: { id: null, name: '', position: '', password: '', status: 'active' },
-                editAttendanceForm: { id: null, employeeId: null, date: '', status: '', adminNote: '' },
-                reportFilter: { 
-                    month: new Date().toISOString().slice(0, 7), // Default to current month
+                // Notification system
+                notification: {
+                    show: false,
+                    message: '',
+                    type: 'info'
                 },
                 
-                // Data
+                // View state
+                currentView: 'employee',
+                selectedEmployee: '',
+                selectedEmployeeDetail: '',
+                selectedMonth: new Date().toISOString().slice(0, 7),
+                selectedDetailMonth: new Date().toISOString().slice(0, 7),
+                
+                // Employee Management
+                showAddEmployee: false,
+                editingEmployee: null,
+                newEmployee: {
+                    name: '',
+                    position: '',
+                    username: '',
+                    password: '',
+                    role: 'employee',
+                    status: 'active'
+                },
+                
+                // KPI Management
+                showAddKPI: false,
+                editingKPI: null,
+                newKPI: {
+                    employeeId: '',
+                    title: '',
+                    description: '',
+                    target: '',
+                    period: new Date().toISOString().slice(0, 7),
+                    current: 0,
+                    isRecurring: false
+                },
+                
+                // Data stores
                 employees: [],
-                attendanceRecords: [],
-                todayAttendance: null,
-                monthlyStats: { present: 0, late: 0, sick: 0, leave: 0 },
-                monthlyReportStats: { present: 0, late: 0, sick: 0, leave: 0, wfe: 0 },
-                attendanceHistory: [],
-                allAttendanceRecords: [],
+                allKPIs: [],
+                employeeKPIs: [],
+                additionalWorkReport: '',
+                additionalWork: [],
                 
-                // Chart instance
-                chartInstance: null,
-                
-                init() {
-                    this.updateDateTime();
-                    setInterval(() => this.updateDateTime(), 1000);
-                    this.loadInitialData();
-                    this.updateReports();
-                    this.updateAllAttendanceRecords();
-                },
-                
-                async loadInitialData() {
-                    this.isLoading = true;
+                // Initialize app
+                async init() {
+                    this.loading = true;
                     try {
-                        const { data: employeesData, error: employeesError } = await supabaseClient
-                            .from('employees')
-                            .select('*');
-
-                        if (employeesError) throw employeesError;
-                        this.employees = employeesData;
-
-                        const { data: attendanceData, error: attendanceError } = await supabaseClient
-                            .from('attendance_records')
-                            .select('*');
-
-                        if (attendanceError) throw attendanceError;
-
-                        // ✅ FIXED: Konversi dari snake_case ke camelCase
-                        this.attendanceRecords = attendanceData.map(record => ({
-                            id: record.id,
-                            employeeId: record.employee_id,  // Konversi ke camelCase
-                            date: record.date,
-                            time: record.time,
-                            status: record.status,
-                            reason: record.reason || '',
-                            adminNote: record.admin_note || ''
-                        }));
-
-                        if (this.currentUser) {
-                            this.updateAttendanceData();
+                        // Try to initialize Supabase
+                        this.supabaseConnected = SupabaseService.init();
+                        
+                        if (this.supabaseConnected) {
+                            // Load data from Supabase
+                            await this.loadDataFromSupabase();
+                            this.showNotification('Terhubung ke database!', 'success');
+                        } else {
+                            // Fallback to demo data
+                            this.loadDemoData();
+                            this.showNotification('Database belum terkonfigurasi', 'info');
                         }
                     } catch (error) {
-                        console.error('Error fetching data from Supabase:', error);
-                        alert('Gagal memuat data dari database. Silakan coba lagi.');
+                        console.error('Error initializing app:', error);
+                        this.loadDemoData();
+                        this.showNotification('Gagal terhubung ke database', 'error');
                     } finally {
-                        this.isLoading = false;
+                        this.loading = false;
                     }
                 },
 
-                
-                generateDemoAttendanceData() {
-                    const now = new Date();
-                    const demoRecords = [];
-                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    const today = new Date();
-                    
-                    for (let d = new Date(startOfMonth); d <= today; d.setDate(d.getDate() + 1)) {
-                        // Skip weekends
-                        if (d.getDay() === 0 || d.getDay() === 6) continue;
+                async loadDataFromSupabase() {
+                    try {
+                        // Load employees
+                        this.employees = await SupabaseService.getEmployees();
                         
-                        this.employees.forEach(employee => {
-                            // Random attendance with higher probability of being present
-                            const rand = Math.random();
-                            let status = 'present';
+                        // Load KPIs and transform format
+                        const kpisFromDB = await SupabaseService.getKPIs();
+                        this.allKPIs = kpisFromDB.map(kpi => ({
+                            id: kpi.id,
+                            employeeId: kpi.employee_id,
+                            title: kpi.title,
+                            description: kpi.description,
+                            target: kpi.target,
+                            current: kpi.current_value,
+                            period: kpi.period,
+                            isRecurring: kpi.is_recurring
+                        }));
+                        
+                        // Load additional work and transform format
+                        const additionalWorkFromDB = await SupabaseService.getAdditionalWork();
+                        this.additionalWork = additionalWorkFromDB.map(work => ({
+                            id: work.id,
+                            employeeId: work.employee_id,
+                            description: work.description,
+                            date: work.work_date
+                        }));
+                        
+                    } catch (error) {
+                        console.error('Error loading data from Supabase:', error);
+                        throw error;
+                    }
+                },
+                
+                // Load demo data for testing
+                loadDemoData() {
+                    // Demo employees
+                    this.employees = [
+                        { 
+                            id: 1, 
+                            name: 'Syafiq', 
+                            position: 'Media Specialist',
+                            username: 'syafiq',
+                            password: 'syafiq123',
+                            role: 'employee',
+                            status: 'active'
+                        },
+                        { 
+                            id: 2, 
+                            name: 'Nur Naimah', 
+                            position: 'Admin HRD',
+                            username: 'naimah',
+                            password: 'naimah123',
+                            role: 'employee',
+                            status: 'active'
+                        }
+                    ];
+                    
+                    // Demo KPIs
+                    const currentMonth = new Date().toISOString().slice(0, 7);
+                    this.allKPIs = [
+                        {
+                            id: 1,
+                            employeeId: 1,
+                            title: 'Konten Media Sosial',
+                            description: 'Membuat konten untuk Instagram dan Facebook',
+                            target: 20,
+                            current: 12,
+                            period: currentMonth
+                        },
+                        {
+                            id: 2,
+                            employeeId: 1,
+                            title: 'Video Editing',
+                            description: 'Edit video promosi dan tutorial',
+                            target: 5,
+                            current: 3,
+                            period: currentMonth
+                        }
+                    ];
+                    
+                    // Demo additional work
+                    this.additionalWork = [
+                        {
+                            id: 1,
+                            employeeId: 1,
+                            description: 'Membantu desain banner untuk acara company gathering',
+                            date: new Date().toISOString().slice(0, 10)
+                        },
+                        {
+                            id: 2,
+                            employeeId: 2,
+                            description: 'Koordinasi dengan vendor untuk maintenance AC kantor',
+                            date: new Date().toISOString().slice(0, 10)
+                        }
+                    ];
+                },
+                
+                // Employee authentication
+                async loginEmployee() {
+                    this.loading = true;
+                    try {
+                        if (this.supabaseConnected) {
+                            // Try login with Supabase
+                            const employee = await SupabaseService.loginEmployee(
+                                this.employeeCredentials.username, 
+                                this.employeeCredentials.password
+                            );
                             
-                            if (rand < 0.05) status = 'sick';
-                            else if (rand < 0.1) status = 'leave';
-                            else if (rand < 0.15) status = 'late';
-                            else if (rand < 0.2) status = 'wfe';
+                            if (employee) {
+                                this.currentUser = { ...employee };
+                                this.showEmployeeLogin = false;
+                                this.currentView = 'employee';
+                                await this.loadEmployeeKPIs();
+                                this.employeeCredentials = { username: '', password: '' };
+                                this.showNotification(`Selamat datang, ${employee.name}!`, 'success');
+                            } else {
+                                this.showNotification('Username atau password salah!', 'error');
+                            }
+                        } else {
+                            // Fallback to demo data
+                            const employee = this.employees.find(emp => 
+                                emp.username === this.employeeCredentials.username && 
+                                emp.password === this.employeeCredentials.password &&
+                                emp.status === 'active'
+                            );
                             
-                            demoRecords.push({
-                                id: Date.now() + Math.random(),
-                                employeeId: employee.id,
-                                date: d.toISOString().split('T')[0],
-                                time: '08:' + String(Math.floor(Math.random() * 30)).padStart(2, '0'),
-                                status: status,
-                                reason: status !== 'present' ? 'Demo data' : ''
-                            });
-                        });
+                            if (employee) {
+                                this.currentUser = { ...employee };
+                                this.showEmployeeLogin = false;
+                                this.currentView = 'employee';
+                                this.loadEmployeeKPIs();
+                                this.employeeCredentials = { username: '', password: '' };
+                                this.showNotification(`Selamat datang, ${employee.name}!`, 'success');
+                            } else {
+                                this.showNotification('Username atau password salah!', 'error');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        this.showNotification('Terjadi kesalahan saat login', 'error');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                // Admin authentication
+                loginAdmin() {
+                    // Check hardcoded admin credentials
+                    if (this.adminCredentials.username === 'admin' && this.adminCredentials.password === 'admin123') {
+                        this.currentUser = { 
+                            id: 0, 
+                            name: 'Administrator', 
+                            role: 'admin',
+                            username: 'admin'
+                        };
+                        this.showAdminLogin = false;
+                        this.currentView = 'employees';
+                        this.adminCredentials = { username: '', password: '' };
+                        this.showNotification('Login berhasil! Selamat datang, Admin.', 'success');
+                        return;
                     }
                     
-                    this.attendanceRecords = demoRecords;
-                    this.saveAttendanceRecords();
-                },
-                
-                updateDateTime() {
-                    const now = new Date();
-                    const options = { timeZone: 'Asia/Jakarta' };
-                    this.currentTime = now.toLocaleTimeString('id-ID', options);
-                    this.currentDate = now.toLocaleDateString('id-ID', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric',
-                        timeZone: 'Asia/Jakarta' 
-                    });
-                },
-                
-                showLogin(type) {
-                    this.loginType = type;
-                    this.showLoginModal = true;
-                    this.loginForm = { username: '', password: '' };
-                },
-                
-                closeLoginModal() {
-                    this.showLoginModal = false;
-                },
-                
-                // Perbaikan di dalam login()
-                async login() {
-                this.isLoading = true;
-                const { username, password } = this.loginForm;
-
-                try {
-                    if (this.loginType === 'admin') {
-                        if (username === 'admin' && password === 'admin123') {
-                            this.currentUser = { id: 'admin', name: 'Administrator', role: 'admin' };
-                            this.currentPage = 'admin';
-                            this.closeLoginModal();
-                            this.$nextTick(() => this.initChart());
-                        } else {
-                            alert('Username atau password admin salah!');
-                        }
-                    } else {
-                        // Ganti 'supabase' menjadi 'supabaseClient'
-                        const { data, error } = await supabaseClient
-                            .from('employees')
-                            .select('*')
-                            .eq('username', username)
-                            .eq('password', password)
-                            .eq('status', 'active')
-                            .single();
-
-                        if (error) {
-                            alert('Username atau password salah, atau akun tidak aktif!');
-                        } else {
-                            this.currentUser = { ...data, role: 'employee' };
-                            this.currentPage = 'employee';
-                            this.updateAttendanceData();
-                            this.closeLoginModal();
-                        }
-                    }
-                } catch (err) {
-                    console.error('Login error:', err);
-                    alert('Terjadi kesalahan saat login.');
-                } finally {
-                    this.isLoading = false;
-                }
-            },
-
-                
-                logout() {
-                    this.currentUser = null;
-                    this.currentPage = 'login';
-                    this.todayAttendance = null;
-                    if (this.chartInstance) {
-                        this.chartInstance.destroy();
-                        this.chartInstance = null;
-                    }
-                },
-                
-                updateAttendanceData() {
-                    if (!this.currentUser || this.currentUser.role !== 'employee') return;
-                    
-                    const today = new Date().toDateString();
-                    this.todayAttendance = this.attendanceRecords.find(record => 
-                        record.employeeId === this.currentUser.id && 
-                        new Date(record.date).toDateString() === today
+                    // Check employee credentials with admin role
+                    const employee = this.employees.find(emp => 
+                        emp.username === this.adminCredentials.username && 
+                        emp.password === this.adminCredentials.password &&
+                        emp.status === 'active' &&
+                        emp.role === 'admin'
                     );
                     
-                    // Calculate monthly stats
-                    const thisMonth = new Date();
-                    const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
-                    const monthEnd = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0);
-                    
-                    const monthlyRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return record.employeeId === this.currentUser.id &&
-                               recordDate >= monthStart && recordDate <= monthEnd;
-                    });
-                    
-                    this.monthlyStats = {
-                        present: monthlyRecords.filter(r => r.status === 'present' || r.status === 'wfe').length, // UBAH: Tambahkan wfe ke perhitungan Hadir
-                        late: monthlyRecords.filter(r => r.status === 'late').length,
-                        sick: monthlyRecords.filter(r => r.status === 'sick').length,
-                        leave: monthlyRecords.filter(r => r.status === 'leave').length // UBAH: Hapus wfe dari perhitungan Izin
-                    };
-                    
-                    // Get recent history (last 30 days, excluding weekends)
-                    const thirtyDaysAgo = new Date();
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                    
-                    this.attendanceHistory = this.attendanceRecords
-                        .filter(record => {
-                            const recordDate = new Date(record.date);
-                            const dayOfWeek = recordDate.getDay();
-                            return record.employeeId === this.currentUser.id &&
-                                   recordDate >= thirtyDaysAgo &&
-                                   dayOfWeek !== 0 && dayOfWeek !== 6; // Exclude weekends
-                        })
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .slice(0, 20);
-                },
-                
-                updateReports() {
-                    // Update monthly report stats based on filter
-                    const [year, month] = this.reportFilter.month.split('-').map(Number);
-                    const monthStart = new Date(year, month - 1, 1);
-                    const monthEnd = new Date(year, month, 0);
-                    
-                    let filteredRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return recordDate >= monthStart && recordDate <= monthEnd;
-                    });
-                    
-                    // Apply division filter
-              //      if (this.reportFilter.division) {
-           //             filteredRecords = filteredRecords.filter(record => {
-            //                const employee = this.employees.find(emp => emp.id === record.employeeId);
-             //               return employee && employee.division === this.reportFilter.division;
-             //           });
-              //      }
-                    
-                    this.monthlyReportStats = {
-                        present: filteredRecords.filter(r => r.status === 'present').length,
-                        late: filteredRecords.filter(r => r.status === 'late').length,
-                        sick: filteredRecords.filter(r => r.status === 'sick').length,
-                        leave: filteredRecords.filter(r => r.status === 'leave').length,
-                        wfe: filteredRecords.filter(r => r.status === 'wfe').length
-                    };
-                    
-                    // Update chart
-                    this.updateChart();
-                },
-                
-                updateChart() {
-                    if (!this.chartInstance) return;
-                    
-                    this.chartInstance.data.datasets[0].data = [
-                        this.monthlyReportStats.present,
-                        this.monthlyReportStats.late,
-                        this.monthlyReportStats.sick,
-                        this.monthlyReportStats.leave,
-                        this.monthlyReportStats.wfe
-                    ];
-                    this.chartInstance.update();
-                },
-                
-                showAttendanceForm(type) {
-                    this.attendanceForm = { type, reason: '' };
-                    this.showAttendanceModal = true;
-                },
-                
-                closeAttendanceModal() {
-                    this.showAttendanceModal = false;
-                },
-                
-                async markAttendance(status) {
-                this.isLoading = true;
-                const now = new Date();
-                const options = { timeZone: 'Asia/Jakarta' };
-                
-                const year = now.toLocaleString('en-US', { year: 'numeric', timeZone: 'Asia/Jakarta' });
-                const month = now.toLocaleString('en-US', { month: '2-digit', timeZone: 'Asia/Jakarta' });
-                const day = now.toLocaleString('en-US', { day: '2-digit', timeZone: 'Asia/Jakarta' });
-                const jakartaDate = `${year}-${month}-${day}`;
-
-                const attendance = {
-                    employee_id: this.currentUser.id,  // ✅ FIXED: employee_id bukan employeeId
-                    date: jakartaDate,
-                    time: now.toLocaleTimeString('id-ID', options),
-                    status: status,
-                    reason: ''
-                };
-
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('attendance_records')
-                        .insert([attendance])
-                        .select();
-
-                    if (error) throw error;
-
-                    // Konversi kembali ke camelCase untuk JavaScript
-                    const savedRecord = {
-                        id: data[0].id,
-                        employeeId: data[0].employee_id,
-                        date: data[0].date,
-                        time: data[0].time,
-                        status: data[0].status,
-                        reason: data[0].reason || ''
-                    };
-                    
-                    this.attendanceRecords.push(savedRecord);
-                    this.updateAttendanceData();
-                    alert('Absensi berhasil dicatat!');
-                } catch (err) {
-                    console.error('Error submitting attendance:', err);
-                    alert(`Gagal mencatat absensi: ${err.message}`);
-                } finally {
-                    this.isLoading = false;
-                }
-            },
-
-
-            async submitAttendanceForm() {
-                this.isLoading = true;
-                const now = new Date();
-                const options = { timeZone: 'Asia/Jakarta' };
-                const jakartaDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-                
-                const newAttendance = {
-                    employee_id: this.currentUser.id,  // ✅ FIXED: employee_id bukan employeeId
-                    date: jakartaDate,
-                    time: now.toLocaleTimeString('id-ID', options),
-                    status: this.attendanceForm.type,
-                    reason: this.attendanceForm.reason
-                };
-
-                try {
-                    const { data, error } = await supabaseClient
-                        .from('attendance_records')
-                        .insert([newAttendance])
-                        .select();
-
-                    if (error) throw error;
-
-                    // Konversi kembali ke camelCase untuk JavaScript
-                    const savedRecord = {
-                        id: data[0].id,
-                        employeeId: data[0].employee_id,
-                        date: data[0].date,
-                        time: data[0].time,
-                        status: data[0].status,
-                        reason: data[0].reason || ''
-                    };
-                    
-                    this.attendanceRecords.push(savedRecord);
-                    this.updateAttendanceData();
-                    this.closeAttendanceModal();
-                    alert('Absensi berhasil dicatat!');
-                } catch (err) {
-                    console.error('Error submitting attendance:', err);
-                    alert(`Gagal mencatat absensi: ${err.message}`);
-                } finally {
-                    this.isLoading = false;
-                }
-            },
-
-                
-                getAttendanceModalTitle() {
-                    const titles = {
-                        late: 'Form Terlambat',
-                        sick: 'Form Sakit',
-                        leave: 'Form Izin',
-                        wfe: 'Form Work From Home'
-                    };
-                    return titles[this.attendanceForm.type] || 'Form Absensi';
-                },
-                
-                // Admin functions
-                showEmployeeModal(employee = null) {
                     if (employee) {
-                        this.employeeForm = { ...employee, password: '' };
+                        this.currentUser = { ...employee };
+                        this.showAdminLogin = false;
+                        this.currentView = 'employees';
+                        this.adminCredentials = { username: '', password: '' };
+                        this.showNotification(`Selamat datang, ${employee.name}!`, 'success');
                     } else {
-                        this.employeeForm = { id: null, name: '', nip: '', position: '', password: '', status: 'active' };
+                        this.showNotification('Username atau password salah, atau Anda tidak memiliki akses admin!', 'error');
                     }
-                    this.showEmployeeFormModal = true;
                 },
                 
-                closeEmployeeModal() {
-                    this.showEmployeeFormModal = false;
+                // Logout function
+                logout() {
+                    this.currentUser = null;
+                    this.currentView = 'employee';
+                    this.selectedEmployee = '';
+                    this.employeeKPIs = [];
+                    this.showNotification('Logout berhasil!', 'success');
                 },
                 
-                async submitEmployeeForm() {
-                    this.isLoading = true;
-                    try {
-                        if (this.employeeForm.id) {
-                            // Update data pegawai
-                            // ✅ GANTI: supabase → supabaseClient
-                            const { error } = await supabaseClient
-                                .from('employees')
-                                .update(this.employeeForm)
-                                .eq('id', this.employeeForm.id);
-
-                            if (error) throw error;
+                // Cancel login modals
+                cancelEmployeeLogin() {
+                    this.showEmployeeLogin = false;
+                    this.employeeCredentials = { username: '', password: '' };
+                },
+                
+                cancelAdminLogin() {
+                    this.showAdminLogin = false;
+                    this.adminCredentials = { username: '', password: '' };
+                },
+                
+                // Employee KPI functions
+                async loadEmployeeKPIs() {
+                    if (this.currentUser && this.currentUser.role === 'employee') {
+                        const currentMonth = new Date().toISOString().slice(0, 7);
+                        
+                        if (this.supabaseConnected) {
+                            try {
+                                const kpis = await SupabaseService.getEmployeeKPIs(this.currentUser.id, currentMonth);
+                                this.employeeKPIs = kpis.map(kpi => ({
+                                    id: kpi.id,
+                                    employeeId: kpi.employee_id,
+                                    title: kpi.title,
+                                    description: kpi.description,
+                                    target: kpi.target,
+                                    current: kpi.current_value,
+                                    period: kpi.period
+                                }));
+                            } catch (error) {
+                                console.error('Error loading employee KPIs:', error);
+                                // Fallback to local data
+                                this.employeeKPIs = this.allKPIs.filter(kpi => 
+                                    kpi.employeeId === this.currentUser.id && 
+                                    kpi.period === currentMonth
+                                );
+                            }
                         } else {
-                            // Tambah pegawai baru
-                            // ✅ GANTI: supabase → supabaseClient
-                            const { error } = await supabaseClient
-                                .from('employees')
-                                .insert({
-                                    name: this.employeeForm.name,
-                                    username: this.employeeForm.username,
-                                    password: this.employeeForm.password,
-                                    position: this.employeeForm.position,
-                                    status: this.employeeForm.status
-                                });
-
-                            if (error) throw error;
+                            // Use local data
+                            this.employeeKPIs = this.allKPIs.filter(kpi => 
+                                kpi.employeeId === this.currentUser.id && 
+                                kpi.period === currentMonth
+                            );
                         }
-                        await this.loadInitialData();
-                        this.closeEmployeeModal();
-                        alert(this.employeeForm.id ? 'Pegawai berhasil diupdate!' : 'Pegawai berhasil ditambahkan!');
-                    } catch (err) {
-                        console.error('Error submitting employee form:', err);
-                        alert('Terjadi kesalahan saat menyimpan data pegawai.');
-                    } finally {
-                        this.isLoading = false;
+                    }
+                },
+                
+                async updateKPIProgress(kpi, change) {
+                    const newValue = kpi.current + change;
+                    if (newValue >= 0 && newValue <= kpi.target) {
+                        this.loading = true;
+                        try {
+                            if (this.supabaseConnected) {
+                                await SupabaseService.updateKPIProgress(kpi.id, newValue);
+                            }
+                            
+                            kpi.current = newValue;
+                            
+                            // Update in allKPIs array
+                            const kpiIndex = this.allKPIs.findIndex(k => k.id === kpi.id);
+                            if (kpiIndex !== -1) {
+                                this.allKPIs[kpiIndex].current = newValue;
+                            }
+                            
+                            this.showNotification('Progress KPI berhasil diupdate!', 'success');
+                        } catch (error) {
+                            console.error('Error updating KPI progress:', error);
+                            this.showNotification('Gagal mengupdate progress KPI', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                },
+                
+                async submitAdditionalWork() {
+                    if (this.additionalWorkReport.trim() && this.currentUser) {
+                        this.loading = true;
+                        try {
+                            const newWorkData = {
+                                employeeId: this.currentUser.id,
+                                description: this.additionalWorkReport.trim(),
+                                date: new Date().toISOString().slice(0, 10)
+                            };
+                            
+                            if (this.supabaseConnected) {
+                                const newWork = await SupabaseService.createAdditionalWork(newWorkData);
+                                this.additionalWork.push({
+                                    id: newWork.id,
+                                    employeeId: newWork.employee_id,
+                                    description: newWork.description,
+                                    date: newWork.work_date
+                                });
+                            } else {
+                                // Add to local array
+                                const newWork = {
+                                    id: Date.now(),
+                                    ...newWorkData
+                                };
+                                this.additionalWork.push(newWork);
+                            }
+                            
+                            this.additionalWorkReport = '';
+                            this.showNotification('Laporan berhasil disimpan!', 'success');
+                        } catch (error) {
+                            console.error('Error submitting additional work:', error);
+                            this.showNotification('Gagal menyimpan laporan', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                },
+                
+                // Employee management functions
+                async saveEmployee() {
+                    if (this.newEmployee.name && this.newEmployee.position && this.newEmployee.username && this.newEmployee.password) {
+                        this.loading = true;
+                        try {
+                            if (this.supabaseConnected) {
+                                if (this.editingEmployee) {
+                                    const updatedEmployee = await SupabaseService.updateEmployee(this.editingEmployee.id, this.newEmployee);
+                                    const index = this.employees.findIndex(emp => emp.id === this.editingEmployee.id);
+                                    this.employees[index] = updatedEmployee;
+                                    this.showNotification('Data pegawai berhasil diupdate!', 'success');
+                                } else {
+                                    const newEmployee = await SupabaseService.createEmployee(this.newEmployee);
+                                    this.employees.push(newEmployee);
+                                    this.showNotification('Pegawai baru berhasil ditambahkan!', 'success');
+                                }
+                            } else {
+                                // Local data management
+                                if (this.editingEmployee) {
+                                    const index = this.employees.findIndex(emp => emp.id === this.editingEmployee.id);
+                                    this.employees[index] = { ...this.newEmployee, id: this.editingEmployee.id };
+                                    this.showNotification('Data pegawai berhasil diupdate!', 'success');
+                                } else {
+                                    const newEmployee = { ...this.newEmployee, id: Date.now() };
+                                    this.employees.push(newEmployee);
+                                    this.showNotification('Pegawai baru berhasil ditambahkan!', 'success');
+                                }
+                            }
+                            this.cancelAddEmployee();
+                        } catch (error) {
+                            console.error('Error saving employee:', error);
+                            if (error.message && (error.message.includes('duplicate') || error.code === '23505')) {
+                                this.showNotification('Username sudah digunakan!', 'error');
+                            } else {
+                                this.showNotification('Gagal menyimpan data pegawai', 'error');
+                            }
+                        } finally {
+                            this.loading = false;
+                        }
                     }
                 },
                 
                 editEmployee(employee) {
-                    this.showEmployeeModal(employee);
+                    this.editingEmployee = employee;
+                    this.newEmployee = { ...employee };
+                    this.showAddEmployee = true;
                 },
                 
-                async deleteEmployee(employeeId) {
-                    if (confirm('Yakin ingin menghapus pegawai ini?')) {
-                        this.isLoading = true;
+                async toggleEmployeeStatus(employee) {
+                    try {
+                        employee.status = employee.status === 'active' ? 'inactive' : 'active';
+                        
+                        if (this.supabaseConnected) {
+                            await SupabaseService.updateEmployee(employee.id, employee);
+                        }
+                        
+                        this.showNotification(`Status pegawai berhasil diubah menjadi ${employee.status === 'active' ? 'aktif' : 'nonaktif'}!`, 'success');
+                    } catch (error) {
+                        console.error('Error updating employee status:', error);
+                        // Revert change
+                        employee.status = employee.status === 'active' ? 'inactive' : 'active';
+                        this.showNotification('Gagal mengubah status pegawai', 'error');
+                    }
+                },
+                
+                cancelAddEmployee() {
+                    this.showAddEmployee = false;
+                    this.editingEmployee = null;
+                    this.newEmployee = {
+                        name: '',
+                        position: '',
+                        username: '',
+                        password: '',
+                        role: 'employee',
+                        status: 'active'
+                    };
+                },
+                
+                // KPI management functions
+                async saveKPI() {
+                    if (this.newKPI.employeeId && this.newKPI.title && this.newKPI.target) {
+                        this.loading = true;
                         try {
-                            // ✅ GANTI: supabase → supabaseClient
-                            const { error } = await supabaseClient
-                                .from('employees')
-                                .delete()
-                                .eq('id', employeeId);
-
-                            if (error) throw error;
-
-                            await this.loadInitialData();
-                            alert('Pegawai berhasil dihapus!');
-                        } catch (err) {
-                            console.error('Error deleting employee:', err);
-                            alert('Terjadi kesalahan saat menghapus pegawai.');
+                            if (this.supabaseConnected) {
+                                if (this.editingKPI) {
+                                    const updatedKPI = await SupabaseService.updateKPI(this.editingKPI.id, {
+                                        employee_id: parseInt(this.newKPI.employeeId),
+                                        title: this.newKPI.title,
+                                        description: this.newKPI.description,
+                                        target: parseInt(this.newKPI.target),
+                                        period: this.newKPI.period
+                                    });
+                                    
+                                    const index = this.allKPIs.findIndex(kpi => kpi.id === this.editingKPI.id);
+                                    this.allKPIs[index] = {
+                                        id: updatedKPI.id,
+                                        employeeId: updatedKPI.employee_id,
+                                        title: updatedKPI.title,
+                                        description: updatedKPI.description,
+                                        target: updatedKPI.target,
+                                        current: updatedKPI.current_value,
+                                        period: updatedKPI.period
+                                    };
+                                    
+                                    this.showNotification('KPI berhasil diupdate!', 'success');
+                                } else {
+                                    const newKPI = await SupabaseService.createKPI(this.newKPI);
+                                    
+                                    this.allKPIs.push({
+                                        id: newKPI.id,
+                                        employeeId: newKPI.employee_id,
+                                        title: newKPI.title,
+                                        description: newKPI.description,
+                                        target: newKPI.target,
+                                        current: newKPI.current_value,
+                                        period: newKPI.period
+                                    });
+                                    
+                                    // Create recurring KPIs if enabled
+                                    if (this.newKPI.isRecurring) {
+                                        for (let i = 1; i <= 11; i++) {
+                                            const futureDate = new Date(this.newKPI.period + '-01');
+                                            futureDate.setMonth(futureDate.getMonth() + i);
+                                            const futurePeriod = futureDate.toISOString().slice(0, 7);
+                                            
+                                            const recurringKPI = await SupabaseService.createKPI({
+                                                ...this.newKPI,
+                                                period: futurePeriod
+                                            });
+                                            
+                                            this.allKPIs.push({
+                                                id: recurringKPI.id,
+                                                employeeId: recurringKPI.employee_id,
+                                                title: recurringKPI.title,
+                                                description: recurringKPI.description,
+                                                target: recurringKPI.target,
+                                                current: recurringKPI.current_value,
+                                                period: recurringKPI.period
+                                            });
+                                        }
+                                    }
+                                    
+                                    this.showNotification('KPI berhasil ditambahkan!', 'success');
+                                }
+                            } else {
+                                // Local data management
+                                if (this.editingKPI) {
+                                    const index = this.allKPIs.findIndex(kpi => kpi.id === this.editingKPI.id);
+                                    this.allKPIs[index] = { ...this.newKPI, id: this.editingKPI.id, current: this.editingKPI.current };
+                                    this.showNotification('KPI berhasil diupdate!', 'success');
+                                } else {
+                                    const newKPI = { ...this.newKPI, id: Date.now(), current: 0 };
+                                    this.allKPIs.push(newKPI);
+                                    
+                                    // Create recurring KPIs if enabled
+                                    if (this.newKPI.isRecurring) {
+                                        for (let i = 1; i <= 11; i++) {
+                                            const futureDate = new Date(this.newKPI.period + '-01');
+                                            futureDate.setMonth(futureDate.getMonth() + i);
+                                            const futurePeriod = futureDate.toISOString().slice(0, 7);
+                                            
+                                            const recurringKPI = { 
+                                                ...this.newKPI, 
+                                                id: Date.now() + i, 
+                                                current: 0, 
+                                                period: futurePeriod 
+                                            };
+                                            this.allKPIs.push(recurringKPI);
+                                        }
+                                    }
+                                    
+                                    this.showNotification('KPI berhasil ditambahkan!', 'success');
+                                }
+                            }
+                            
+                            this.cancelAddKPI();
+                            await this.loadEmployeeKPIs();
+                        } catch (error) {
+                            console.error('Error saving KPI:', error);
+                            this.showNotification('Gagal menyimpan KPI', 'error');
                         } finally {
-                            this.isLoading = false;
+                            this.loading = false;
+                        }
+                    }
+                },
+
+                editKPI(kpi) {
+                    this.editingKPI = kpi;
+                    this.newKPI = { ...kpi };
+                    this.showAddKPI = true;
+                },
+                
+                async deleteKPI(kpiId) {
+                    if (confirm('Yakin ingin menghapus KPI ini?')) {
+                        this.loading = true;
+                        try {
+                            if (this.supabaseConnected) {
+                                await SupabaseService.deleteKPI(kpiId);
+                            }
+                            
+                            this.allKPIs = this.allKPIs.filter(kpi => kpi.id !== kpiId);
+                            this.showNotification('KPI berhasil dihapus!', 'success');
+                        } catch (error) {
+                            console.error('Error deleting KPI:', error);
+                            this.showNotification('Gagal menghapus KPI', 'error');
+                        } finally {
+                            this.loading = false;
                         }
                     }
                 },
                 
-                editAttendanceRecord(record) {
-                    this.editAttendanceForm = { ...record };
-                    this.showEditAttendanceModal = true;
-                },
-                
-                closeEditAttendanceModal() {
-                    this.showEditAttendanceModal = false;
-                },
-                async submitEditAttendance() {
-                    this.isLoading = true;
-                    try {
-                        // ✅ FIXED: Konversi camelCase ke snake_case untuk database
-                        const updateData = {
-                            employee_id: this.editAttendanceForm.employeeId,
-                            date: this.editAttendanceForm.date,
-                            status: this.editAttendanceForm.status,
-                            admin_note: this.editAttendanceForm.adminNote
-                        };
-                        
-                        const { error } = await supabaseClient
-                            .from('attendance_records')
-                            .update(updateData)
-                            .eq('id', this.editAttendanceForm.id);
-
-                        if (error) throw error;
-
-                        await this.loadInitialData();
-                        this.closeEditAttendanceModal();
-                        alert('Absensi berhasil diupdate!');
-                    } catch (err) {
-                        console.error('Error updating attendance record:', err);
-                        alert(`Terjadi kesalahan: ${err.message}`);
-                    } finally {
-                        this.isLoading = false;
-                    }
-                },
-                                
-                exportMonthlyReport() {
-                    // Export CSV for selected month and division
-                    const [year, month] = this.reportFilter.month.split('-').map(Number);
-                    const monthStart = new Date(year, month - 1, 1);
-                    const monthEnd = new Date(year, month, 0);
-                    
-                    let filteredRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return recordDate >= monthStart && recordDate <= monthEnd;
-                    });
-                    
-                    
-                    const headers = ['Nama', 'Tanggal', 'Waktu', 'Status', 'Keterangan'];
-                    const rows = filteredRecords.map(record => {
-                        const employee = this.employees.find(emp => emp.id === record.employeeId);
-                        return [
-                            employee ? employee.name : 'Unknown',
-                            this.formatDate(record.date),
-                            record.time,
-                            this.getStatusText(record.status),
-                            record.reason || record.adminNote || ''
-                        ];
-                    });
-                    
-                    const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n');
-                    const blob = new Blob([csvContent], { type: 'text/csv' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    const monthName = new Date(year, month - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-                    a.download = `laporan_absensi_${monthName.replace(' ', '_')}.csv`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                },
-                
-                getSelectedMonthText() {
-                    if (!this.reportFilter.month) return 'Bulan Ini';
-                    const [year, month] = this.reportFilter.month.split('-').map(Number);
-                    return new Date(year, month - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-                },
-                
-                getFilteredEmployees() {
-                    return this.employees;
-                },
-                
-                getMonthlyEmployeeStats(employeeId) {
-                    const [year, month] = this.reportFilter.month.split('-').map(Number);
-                    const monthStart = new Date(year, month - 1, 1);
-                    const monthEnd = new Date(year, month, 0);
-                    
-                    const monthlyRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return record.employeeId === employeeId &&
-                               recordDate >= monthStart && recordDate <= monthEnd;
-                    });
-                    
-                    return {
-                        present: monthlyRecords.filter(r => r.status === 'present').length,
-                        late: monthlyRecords.filter(r => r.status === 'late').length,
-                        sick: monthlyRecords.filter(r => r.status === 'sick').length,
-                        leave: monthlyRecords.filter(r => r.status === 'leave').length,
-                        wfe: monthlyRecords.filter(r => r.status === 'wfe').length
+                cancelAddKPI() {
+                    this.showAddKPI = false;
+                    this.editingKPI = null;
+                    this.newKPI = {
+                        employeeId: '',
+                        title: '',
+                        description: '',
+                        target: '',
+                        period: new Date().toISOString().slice(0, 7),
+                        current: 0,
+                        isRecurring: false
                     };
                 },
                 
-                getMonthlyAttendanceRate(employeeId) {
-                    const [year, month] = this.reportFilter.month.split('-').map(Number);
-                    const monthStart = new Date(year, month - 1, 1);
-                    const monthEnd = new Date(year, month, 0);
-                    
-                    // Count working days (exclude weekends)
-                    let workingDays = 0;
-                    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
-                        if (d.getDay() !== 0 && d.getDay() !== 6) workingDays++;
-                    }
-                    
-                    const presentRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return record.employeeId === employeeId &&
-                               recordDate >= monthStart && recordDate <= monthEnd &&
-                               ['present', 'late', 'wfe'].includes(record.status);
-                    }).length;
-                    
-                    return workingDays > 0 ? Math.round((presentRecords / workingDays) * 100) : 0;
+                // Employee dashboard statistics
+                getCompletedKPIs() {
+                    return this.employeeKPIs.filter(kpi => kpi.current >= kpi.target).length;
+                },
+                
+                getAverageProgress() {
+                    if (this.employeeKPIs.length === 0) return 0;
+                    const total = this.employeeKPIs.reduce((sum, kpi) => sum + (kpi.current / kpi.target * 100), 0);
+                    return Math.round(total / this.employeeKPIs.length);
+                },
+                
+                getRecentAdditionalWork() {
+                    if (!this.currentUser) return [];
+                    return this.additionalWork
+                        .filter(work => work.employeeId === this.currentUser.id)
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .slice(0, 5);
                 },
                 
                 // Utility functions
-                getStatusText(status) {
-                    const statusTexts = {
-                        present: 'Hadir',
-                        late: 'Terlambat',
-                        sick: 'Sakit',
-                        leave: 'Izin',
-                        wfe: 'wfe',
-                        absent: 'Tidak Hadir'
-                    };
-                    return statusTexts[status] || status;
-                },
-                
-                getStatusClass(status) {
-                    const statusClasses = {
-                        present: 'bg-emerald-100 text-emerald-800',
-                        late: 'bg-amber-100 text-amber-800',
-                        sick: 'bg-red-100 text-red-800',
-                        leave: 'bg-slate-100 text-slate-800',
-                        wfe: 'bg-blue-100 text-blue-800',
-                        absent: 'bg-red-100 text-red-800'
-                    };
-                    return statusClasses[status] || 'bg-slate-100 text-slate-800';
-                },
-                
-                formatDate(dateString) {
-                    return new Date(dateString).toLocaleDateString('id-ID', {
-                        weekday: 'short',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
-                },
-                
                 getEmployeeName(employeeId) {
                     const employee = this.employees.find(emp => emp.id === employeeId);
                     return employee ? employee.name : 'Unknown';
                 },
                 
-                getTodayStatusText(employeeId) {
-                    const today = new Date().toDateString();
-                    const record = this.attendanceRecords.find(record => 
-                        record.employeeId === employeeId && 
-                        new Date(record.date).toDateString() === today
-                    );
-                    return record ? this.getStatusText(record.status) : 'Belum Absen';
+                getActiveEmployees() {
+                    return this.employees.filter(emp => emp.status === 'active');
                 },
                 
-                getTodayStatusClass(employeeId) {
-                    const today = new Date().toDateString();
-                    const record = this.attendanceRecords.find(record => 
-                        record.employeeId === employeeId && 
-                        new Date(record.date).toDateString() === today
+                getEmployeeKPIsForMonth(employeeId, month) {
+                    return this.allKPIs.filter(kpi => 
+                        kpi.employeeId == employeeId && 
+                        kpi.period === month
                     );
-                    return record ? this.getStatusClass(record.status) : 'bg-slate-100 text-slate-800';
                 },
                 
-                getAttendanceRate(employeeId) {
-                    const thisMonth = new Date();
-                    const monthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
-                    const monthEnd = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0);
-                    
-                    // Count working days (exclude weekends)
-                    let workingDays = 0;
-                    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
-                        if (d.getDay() !== 0 && d.getDay() !== 6) workingDays++;
+                getFilteredEmployeeKPIs(employeeId) {
+                    return this.allKPIs.filter(kpi => 
+                        kpi.employeeId == employeeId && 
+                        kpi.period === this.selectedDetailMonth
+                    );
+                },
+                
+                getFilteredEmployeeAdditionalWork(employeeId) {
+                    return this.additionalWork.filter(work => {
+                        const workMonth = work.date.slice(0, 7);
+                        return work.employeeId == employeeId && workMonth === this.selectedDetailMonth;
+                    });
+                },
+                
+                getEmployeeAverageKPI(employeeId) {
+                    const kpis = this.allKPIs.filter(kpi => 
+                        kpi.employeeId == employeeId && 
+                        kpi.period === this.selectedMonth
+                    );
+                    if (kpis.length === 0) return 0;
+                    const total = kpis.reduce((sum, kpi) => sum + (kpi.current / kpi.target * 100), 0);
+                    return Math.round(total / kpis.length);
+                },
+                
+                getKPIStatus(kpi) {
+                    const percentage = (kpi.current / kpi.target) * 100;
+                    if (percentage >= 100) return 'Selesai';
+                    if (percentage >= 75) return 'Hampir Selesai';
+                    if (percentage >= 50) return 'Dalam Progress';
+                    return 'Perlu Perhatian';
+                },
+                
+                getKPIStatusColor(kpi) {
+                    const percentage = (kpi.current / kpi.target) * 100;
+                    if (percentage >= 100) return 'bg-green-100 text-green-800';
+                    if (percentage >= 75) return 'bg-blue-100 text-blue-800';
+                    if (percentage >= 50) return 'bg-yellow-100 text-yellow-800';
+                    return 'bg-red-100 text-red-800';
+                },
+                
+                getProgressBarColor(kpi) {
+                    const percentage = (kpi.current / kpi.target) * 100;
+                    if (percentage >= 100) return 'bg-green-500';
+                    if (percentage >= 75) return 'bg-blue-500';
+                    if (percentage >= 50) return 'bg-yellow-500';
+                    return 'bg-red-500';
+                },
+                
+                formatDate(dateString) {
+                    return new Date(dateString).toLocaleDateString('id-ID');
+                },
+                
+                formatPeriod(period) {
+                    const date = new Date(period + '-01');
+                    return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long' });
+                },
+                
+                loadMonthlyReport() {
+                    // This function can be used to trigger additional processing when month changes
+                },
+                
+                loadEmployeeDetail() {
+                    // This function can be used to trigger additional processing when employee/month changes
+                },
+                
+                // Notification system
+                // Perbaiki fungsi notification di dalam kpiApp()
+                // Tambahkan property untuk timeout management
+                notificationTimeout: null,
+
+                // Perbaiki fungsi showNotification
+                showNotification(message, type = 'info') {
+                    // Clear timeout sebelumnya jika ada
+                    if (this.notificationTimeout) {
+                        clearTimeout(this.notificationTimeout);
+                        this.notificationTimeout = null;
                     }
                     
-                    const presentRecords = this.attendanceRecords.filter(record => {
-                        const recordDate = new Date(record.date);
-                        return record.employeeId === employeeId &&
-                               recordDate >= monthStart && recordDate <= monthEnd &&
-                               ['present', 'late', 'wfe'].includes(record.status);
-                    }).length;
+                    // Set notifikasi baru
+                    this.notification = {
+                        show: true,
+                        message: message,
+                        type: type
+                    };
                     
-                    return workingDays > 0 ? Math.round((presentRecords / workingDays) * 100) : 0;
+                    // Set timeout baru (5 detik lebih reasonable)
+                    this.notificationTimeout = setTimeout(() => {
+                        this.hideNotification();
+                    }, 5000);
                 },
-                
-                get todayPresentCount() {
-                    const today = new Date().toDateString();
-                    return this.attendanceRecords.filter(record => 
-                        new Date(record.date).toDateString() === today &&
-                        ['present', 'late', 'wfe'].includes(record.status)
-                    ).length;
+
+                // Perbaiki fungsi hideNotification
+                hideNotification() {
+                    // Clear timeout jika ada
+                    if (this.notificationTimeout) {
+                        clearTimeout(this.notificationTimeout);
+                        this.notificationTimeout = null;
+                    }
+                    
+                    this.notification.show = false;
+                    
+                    // Reset message setelah animasi selesai
+                    setTimeout(() => {
+                        this.notification.message = '';
+                        this.notification.type = 'info';
+                    }, 300);
                 },
-                
-                get allAttendanceRecords() {
-                    return this.attendanceRecords
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .slice(0, 50); // Show last 50 records
-                },
-                
-                updateAllAttendanceRecords() {
-                    // Trigger reactivity
-                    this.attendanceRecords = [...this.attendanceRecords];
-                },
-              
-                // menyimpan di localstorage  
-          //      saveEmployees() {
-           //         localStorage.setItem('employees', JSON.stringify(this.employees));
-             //   },
-                
-             //   saveAttendanceRecords() {
-             //       localStorage.setItem('attendanceRecords', JSON.stringify(this.attendanceRecords));
-              //  },
-                
-                initChart() {
-                    this.$nextTick(() => {
-                        setTimeout(() => {
-                            const ctx = document.getElementById('attendanceChart');
-                            if (ctx && !this.chartInstance) {
-                                this.chartInstance = new Chart(ctx, {
-                                    type: 'bar',
-                                    data: {
-                                        labels: ['Hadir', 'Terlambat', 'Sakit', 'Izin', 'wfe'],
-                                        datasets: [{
-                                            label: 'Jumlah',
-                                            data: [
-                                                this.monthlyReportStats.present,
-                                                this.monthlyReportStats.late,
-                                                this.monthlyReportStats.sick,
-                                                this.monthlyReportStats.leave,
-                                                this.monthlyReportStats.wfe
-                                            ],
-                                            backgroundColor: [
-                                                '#059669', // emerald-600
-                                                '#d97706', // amber-600
-                                                '#dc2626', // red-600
-                                                '#64748b', // slate-500
-                                                '#2563eb'  // blue-600
-                                            ],
-                                            borderWidth: 0,
-                                            borderRadius: 8
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            }
-                                        },
-                                        scales: {
-                                            y: {
-                                                beginAtZero: true,
-                                                grid: {
-                                                    color: '#f1f5f9'
-                                                },
-                                                ticks: {
-                                                    color: '#64748b',
-                                                    stepSize: 1
-                                                }
-                                            },
-                                            x: {
-                                                grid: {
-                                                    display: false
-                                                },
-                                                ticks: {
-                                                    color: '#64748b'
-                                                }
-                                            }
-                                        },
-                                        layout: {
-                                            padding: {
-                                                top: 20,
-                                                bottom: 20
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }, 100);
-                    });
-                }
             }
         }
     </script>
-
-    <style>
-        [x-cloak] { display: none !important; }
-        
-        /* Custom scrollbar for better UX */
-        .custom-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
-        }
-        
-        /* Touch targets for mobile */
-        @media (max-width: 768px) {
-            button, .btn {
-                min-height: 44px;
-                min-width: 44px;
-            }
-        }
-        
-        /* Performance optimizations */
-        * {
-            box-sizing: border-box;
-        }
-        
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        
-        /* Smooth focus states */
-        button:focus,
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: 2px solid #e65705;
-            outline-offset: 2px;
-        }
-        
-        /* Loading states */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        /* Mobile-first responsive design */
-        .mobile-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        
-        @media (min-width: 640px) {
-            .mobile-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .mobile-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        
-        /* Accessibility improvements */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-        
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .bg-slate-50 { background-color: #ffffff; }
-            .border-slate-200 { border-color: #000000; }
-            .text-slate-600 { color: #000000; }
-        }
-        
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-        
-        /* Print styles */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            
-            body {
-                background: white !important;
-                color: black !important;
-            }
-            
-            .bg-white {
-                box-shadow: none !important;
-            }
-        }
-        
-        /* Dark mode preparation (can be activated later) */
-        @media (prefers-color-scheme: dark) {
-            .dark-mode {
-                background-color: #1e293b;
-                color: #f1f5f9;
-            }
-            
-            .dark-mode .bg-white {
-                background-color: #334155;
-            }
-            
-            .dark-mode .text-slate-900 {
-                color: #f1f5f9;
-            }
-        }
-    </style>
 </body>
 </html>
